@@ -1,0 +1,23 @@
+:root{
+  --shopy-black:#111111;
+  --shopy-white:#ffffff;
+  --shopy-ivory:#f5f2ec;
+  --shopy-stone:#dedad2;
+  --shopy-muted:#77736d;
+  --shopy-wine:#641f2b;
+}
+.icon-btn{display:inline-grid!important;place-items:center;width:34px;height:34px;padding:0!important;background:none!important;border:0!important;color:inherit;cursor:pointer}
+.icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
+.count-link{position:relative}
+.count-link i{top:-3px!important;right:-4px!important}
+.account-link{white-space:nowrap}
+.site-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid transparent}
+.site-header.scrolled{border-bottom-color:var(--line)}
+.nav{background:transparent}
+.logo{font-family:Arial,sans-serif;font-weight:900;letter-spacing:-2.8px}
+.logo span{color:var(--shopy-wine)}
+@media(max-width:700px){
+  .account-link{display:none!important}
+  .actions{gap:4px!important}
+  .icon-btn{width:32px;height:32px}
+}

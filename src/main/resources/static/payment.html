@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Payment - Shopora</title>
+<link href="style.css" rel="stylesheet"/>
+<link href="/shopy-premium.css" rel="stylesheet"/></head>
+<body>
+<header class="navbar">
+<div class="logo">
+        Shopora
+    </div>
+<nav class="nav-links">
+<a href="/">
+            Home
+        </a>
+<a href="/cart.html">
+            Cart 🛒
+        </a>
+</nav>
+</header>
+<main>
+<section class="cart-page">
+<h1>
+            Payment
+        </h1>
+<!-- ORDER SUMMARY -->
+<div class="cart-total">
+<h2>
+                Order Summary
+            </h2>
+<p id="orderId">
+                Order ID: Loading...
+            </p>
+<p id="paymentAmount" style="
+                    font-size:26px;
+                    font-weight:bold;
+                    color:#d35400;
+                    margin-top:10px;
+                ">
+                Amount: Loading...
+            </p>
+</div>
+<!-- PAYMENT METHOD -->
+<div class="cart-total">
+<h2>
+                Choose Payment Method
+            </h2>
+<p style="
+                    color:#6b7280;
+                    margin-bottom:20px;
+                ">
+                This is a simulated payment for the Shopora project.
+            </p>
+<form id="paymentForm">
+<label style="
+                        display:block;
+                        padding:15px;
+                        border:1px solid #d1d5db;
+                        border-radius:7px;
+                        margin-bottom:12px;
+                        cursor:pointer;
+                    ">
+<input checked="" name="paymentMethod" type="radio" value="UPI"/>
+
+                    UPI
+
+                </label>
+<label style="
+                        display:block;
+                        padding:15px;
+                        border:1px solid #d1d5db;
+                        border-radius:7px;
+                        margin-bottom:12px;
+                        cursor:pointer;
+                    ">
+<input name="paymentMethod" type="radio" value="CARD"/>
+
+                    Credit / Debit Card
+
+                </label>
+<label style="
+                        display:block;
+                        padding:15px;
+                        border:1px solid #d1d5db;
+                        border-radius:7px;
+                        margin-bottom:12px;
+                        cursor:pointer;
+                    ">
+<input name="paymentMethod" type="radio" value="COD"/>
+
+                    Cash on Delivery
+
+                </label>
+<br/>
+<button class="primary-button" id="payButton" style="width:100%;" type="submit">
+                    Pay Now
+                </button>
+</form>
+</div>
+</section>
+</main>
+<footer>
+<div class="footer-content">
+<div>
+<h3>
+                Shopora
+            </h3>
+<p>
+                Your simple and reliable
+                online shopping destination.
+            </p>
+</div>
+</div>
+<div class="footer-bottom">
+<p>
+            © 2026 Shopora. All rights reserved.
+        </p>
+</div>
+</footer>
+<script src="payment.js"></script>
+<script src="/shopy-ui.js"></script></body>
+</html>

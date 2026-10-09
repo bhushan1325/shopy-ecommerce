@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SHOPY — Shopping Bag</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="/cart.css?v=1" rel="stylesheet"/>
+<link href="/shopy-premium.css" rel="stylesheet"/></head>
+<body>
+<div class="announcement">
+    FREE SHIPPING ON ORDERS OVER ₹1,999
+    <span>•</span>
+    EASY RETURNS
+</div>
+<header class="site-header">
+<div class="nav-wrap">
+<a class="logo" href="/">
+            SHOPY<span>.</span>
+</a>
+<nav class="main-nav">
+<a href="/">Home</a>
+<a href="/?category=Women">Women</a>
+<a href="/?category=Men">Men</a>
+<a href="/?category=Teens">Teens</a>
+<a href="/?category=Kids">Kids</a>
+<a href="/?category=Babies">Babies</a>
+<a href="/?category=Accessories">Accessories</a>
+<a class="sale" href="/?sale=true">Sale</a>
+</nav>
+<div class="nav-actions">
+<button aria-label="Search" class="icon-btn" onclick="document.getElementById('searchPanel').classList.toggle('open')" type="button">
+<svg viewbox="0 0 24 24">
+<circle cx="11" cy="11" r="6.5"></circle>
+<path d="M16 16l5 5"></path>
+</svg>
+</button>
+<a aria-label="Wishlist" class="icon-btn" href="/wishlist.html">
+<svg viewbox="0 0 24 24">
+<path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 1 8 4c1.4 0 2.6.6 4 2 1.4-1.4 2.6-2 4-2a4.8 4.8 0 0 1 4.8 4.8z"></path>
+</svg>
+</a>
+<a aria-label="Shopping bag" class="icon-btn bag-btn" href="/cart.html">
+<svg viewbox="0 0 24 24">
+<path d="M5 8h14l-1 12H6L5 8z"></path>
+<path d="M9 8V6a3 3 0 0 1 6 0v2"></path>
+</svg>
+</a>
+<a aria-label="Account" class="icon-btn account-btn" href="/profile.html">
+<svg viewbox="0 0 24 24">
+<circle cx="12" cy="8" r="3.2"></circle>
+<path d="M5.5 20c.8-3.4 3-5.2 6.5-5.2s5.7 1.8 6.5 5.2"></path>
+</svg>
+</a>
+</div>
+</div>
+<div class="search-panel" id="searchPanel">
+<div class="search-inner">
+<label for="cartSearchInput">SEARCH SHOPY</label>
+<div class="search-field">
+<input autocomplete="off" id="cartSearchInput" onkeydown="handleCartSearch(event)" placeholder="Search clothing, accessories, brands..." type="search"/>
+<button onclick="goToSearch()" type="button">
+                    SEARCH
+                </button>
+</div>
+</div>
+</div>
+</header>
+<main>
+<section class="cart-hero">
+<div>
+<p class="eyebrow">
+                SHOPY / BAG
+            </p>
+<h1>
+                Your shopping bag.
+            </h1>
+<p class="hero-copy">
+                Review your selected pieces before you continue to checkout.
+            </p>
+</div>
+<a class="continue-link" href="/">
+            Continue shopping →
+        </a>
+</section>
+<section class="cart-layout">
+<div class="cart-main">
+<div class="cart-heading">
+<div>
+<span class="section-label">YOUR SELECTION</span>
+<h2>Shopping bag</h2>
+</div>
+<span class="item-count" id="cartItemCount">
+                    Items: 0
+                </span>
+</div>
+<div id="cartContainer">
+<div class="loading-card">
+<div class="loading-bar"></div>
+<div class="loading-bar short"></div>
+<p>Loading your bag...</p>
+</div>
+</div>
+</div>
+<aside class="summary-card">
+<div class="summary-top">
+<p class="section-label">
+                    ORDER SUMMARY
+                </p>
+<h2>
+                    Summary
+                </h2>
+</div>
+<div class="summary-lines">
+<div>
+<span>Items</span>
+<strong id="summaryItems">—</strong>
+</div>
+<div>
+<span>Shipping</span>
+<strong>FREE</strong>
+</div>
+</div>
+<div class="summary-total">
+<span>Total</span>
+<strong id="cartTotal">
+                    Total: ₹0
+                </strong>
+</div>
+<button class="checkout-btn" onclick="goToCheckout()" type="button">
+                PROCEED TO CHECKOUT
+            </button>
+<p class="secure-note">
+                Secure checkout · Easy returns · Trusted payment
+            </p>
+</aside>
+</section>
+<section class="service-strip">
+<div>
+<span class="service-icon">01</span>
+<strong>FREE DELIVERY</strong>
+<p>On orders over ₹1,999</p>
+</div>
+<div>
+<span class="service-icon">02</span>
+<strong>EASY RETURNS</strong>
+<p>Simple return process</p>
+</div>
+<div>
+<span class="service-icon">03</span>
+<strong>SECURE PAYMENT</strong>
+<p>Your payment is protected</p>
+</div>
+</section>
+</main>
+<footer>
+<div class="footer-top">
+<a class="footer-logo" href="/">
+            SHOPY<span>.</span>
+</a>
+<p>
+            Fashion for every generation.
+        </p>
+</div>
+<div class="footer-bottom">
+<span>© 2026 SHOPY. All rights reserved.</span>
+<div>
+<a href="/">Shop</a>
+<a href="/wishlist.html">Wishlist</a>
+<a href="/profile.html">Account</a>
+</div>
+</div>
+</footer>
+<script src="/cart.js?v=1"></script>
+<script src="/shopy-ui.js"></script></body>
+</html>

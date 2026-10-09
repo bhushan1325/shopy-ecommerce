@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Checkout - Shopora</title>
+<style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eaeded;
+            color: #111;
+        }
+
+        button,
+        input,
+        textarea {
+            font-family: inherit;
+        }
+
+        /* =========================
+           TOP NAVBAR
+        ========================= */
+
+        .top-nav {
+            background: #131921;
+            min-height: 65px;
+            display: flex;
+            align-items: center;
+            padding: 8px 25px;
+            gap: 25px;
+            color: white;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ff9900;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .logo span {
+            color: white;
+        }
+
+        .checkout-secure {
+            margin-left: auto;
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        .checkout-secure span {
+            color: #67c15e;
+        }
+
+        /* =========================
+           PROGRESS
+        ========================= */
+
+        .checkout-progress {
+            background: white;
+            border-bottom: 1px solid #ddd;
+            padding: 18px 25px;
+        }
+
+        .progress-container {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .step.active {
+            color: #111;
+            font-weight: bold;
+        }
+
+        .step.active .step-number {
+            background: #ff9900;
+            color: white;
+        }
+
+        .progress-line {
+            width: 100px;
+            height: 2px;
+            background: #ddd;
+            margin: 0 18px;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .checkout-page {
+            width: min(1400px, 94%);
+            margin: 25px auto 60px;
+        }
+
+        .checkout-heading {
+            margin-bottom: 20px;
+        }
+
+        .checkout-heading h1 {
+            font-size: 30px;
+            font-weight: 500;
+        }
+
+        .checkout-heading p {
+            color: #565959;
+            margin-top: 6px;
+        }
+
+        /* =========================
+           TWO COLUMNS
+        ========================= */
+
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 370px;
+            gap: 22px;
+            align-items: start;
+        }
+
+        /* =========================
+           LEFT
+        ========================= */
+
+        .checkout-left {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .checkout-card {
+            background: white;
+            padding: 25px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-number {
+            width: 32px;
+            height: 32px;
+            background: #232f3e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .card-heading h2 {
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .card-description {
+            color: #565959;
+            font-size: 14px;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           FORM
+        ========================= */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        .required {
+            color: #b12704;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            border: 1px solid #888;
+            border-radius: 4px;
+            padding: 11px 12px;
+            font-size: 15px;
+            outline: none;
+            background: white;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #007eb9;
+            box-shadow: 0 0 0 2px rgba(0, 126, 185, 0.15);
+        }
+
+        .form-help {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* =========================
+           DELIVERY INFO
+        ========================= */
+
+        .delivery-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .delivery-option {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .delivery-option.selected {
+            border-color: #e77600;
+            background: #fffaf0;
+        }
+
+        .delivery-option input {
+            margin-top: 3px;
+        }
+
+        .delivery-option strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .delivery-option p {
+            color: #565959;
+            font-size: 13px;
+        }
+
+        /* =========================
+           RIGHT SUMMARY
+        ========================= */
+
+        .order-summary {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 23px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .order-summary h2 {
+            font-size: 21px;
+            font-weight: 500;
+            margin-bottom: 18px;
+        }
+
+        .summary-message {
+            background: #f0f8f0;
+            border: 1px solid #d5e8d5;
+            padding: 13px;
+            border-radius: 4px;
+            color: #007600;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 13px;
+            font-size: 14px;
+        }
+
+        .summary-row span:last-child {
+            font-weight: bold;
+        }
+
+        .summary-divider {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 18px 0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .total-row span:last-child {
+            color: #b12704;
+        }
+
+        .place-order-button {
+            width: 100%;
+            background: #ffd814;
+            border: 1px solid #fcd200;
+            border-radius: 20px;
+            padding: 12px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .place-order-button:hover {
+            background: #f7ca00;
+        }
+
+        .place-order-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .summary-note {
+            text-align: center;
+            color: #565959;
+            font-size: 12px;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           SECURITY
+        ========================= */
+
+        .security-box {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 18px;
+            color: #565959;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            background: #131921;
+            color: white;
+            margin-top: 40px;
+        }
+
+        .footer-top {
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px 25px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 35px;
+        }
+
+        .footer-column h3,
+        .footer-column h4 {
+            margin-bottom: 15px;
+        }
+
+        .footer-column p {
+            color: #ddd;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .footer-column a {
+            display: block;
+            color: #ddd;
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .footer-column a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #3a4553;
+            text-align: center;
+            padding: 20px;
+            color: #bbb;
+            font-size: 13px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 900px) {
+
+            .checkout-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .top-nav {
+                padding: 12px 15px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            .checkout-secure {
+                font-size: 12px;
+            }
+
+            .checkout-progress {
+                overflow-x: auto;
+            }
+
+            .progress-container {
+                min-width: 500px;
+            }
+
+            .progress-line {
+                width: 50px;
+                margin: 0 10px;
+            }
+
+            .checkout-page {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .checkout-heading {
+                padding: 0 15px;
+            }
+
+            .checkout-heading h1 {
+                font-size: 25px;
+            }
+
+            .checkout-card {
+                border-left: none;
+                border-right: none;
+                border-radius: 0;
+                padding: 20px 15px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-group.full-width {
+                grid-column: auto;
+            }
+
+            .order-summary {
+                border-left: none;
+                border-right: none;
+                padding: 20px 15px;
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr;
+                padding: 30px 20px;
+            }
+        }
+
+    </style>
+<link href="/shopy-brand.css" rel="stylesheet"/>
+<link href="/shopy-premium.css" rel="stylesheet"/></head>
+<body>
+<!-- =========================
+     HEADER
+========================= -->
+<header class="top-nav">
+<a class="logo" href="/">
+        Shop<span>ora</span>
+</a>
+<div class="checkout-secure">
+        🔒 <span>Secure Checkout</span>
+</div>
+</header>
+<!-- =========================
+     CHECKOUT PROGRESS
+========================= -->
+<div class="checkout-progress">
+<div class="progress-container">
+<div class="step active">
+<div class="step-number">
+                1
+            </div>
+<span>
+                Delivery
+            </span>
+</div>
+<div class="progress-line"></div>
+<div class="step">
+<div class="step-number">
+                2
+            </div>
+<span>
+                Payment
+            </span>
+</div>
+<div class="progress-line"></div>
+<div class="step">
+<div class="step-number">
+                3
+            </div>
+<span>
+                Confirmation
+            </span>
+</div>
+</div>
+</div>
+<!-- =========================
+     MAIN
+========================= -->
+<main class="checkout-page">
+<div class="checkout-heading">
+<h1>
+            Checkout
+        </h1>
+<p>
+            Complete your delivery details to continue.
+        </p>
+</div>
+<div class="checkout-layout">
+<!-- =========================
+             LEFT SIDE
+        ========================= -->
+<div class="checkout-left">
+<!-- DELIVERY ADDRESS -->
+<section class="checkout-card">
+<div class="card-heading">
+<div class="card-number">
+                        1
+                    </div>
+<h2>
+                        Delivery Address
+                    </h2>
+</div>
+<p class="card-description">
+                    Enter the address where you want your Shopora order delivered.
+                </p>
+<form id="checkoutForm">
+<div class="form-grid">
+<!-- NAME -->
+<div class="form-group">
+<label for="fullName">
+                                Full Name
+                                <span class="required">*</span>
+</label>
+<input id="fullName" placeholder="Enter your full name" required="" type="text"/>
+</div>
+<!-- PHONE -->
+<div class="form-group">
+<label for="phone">
+                                Phone Number
+                                <span class="required">*</span>
+</label>
+<input id="phone" placeholder="Enter phone number" required="" type="tel"/>
+<span class="form-help">
+                                Used only for delivery updates.
+                            </span>
+</div>
+<!-- ADDRESS -->
+<div class="form-group full-width">
+<label for="addressLine">
+                                Address
+                                <span class="required">*</span>
+</label>
+<textarea id="addressLine" placeholder="House number, building, street, area" required=""></textarea>
+</div>
+<!-- CITY -->
+<div class="form-group">
+<label for="city">
+                                City
+                                <span class="required">*</span>
+</label>
+<input id="city" placeholder="Enter city" required="" type="text"/>
+</div>
+<!-- STATE -->
+<div class="form-group">
+<label for="state">
+                                State
+                                <span class="required">*</span>
+</label>
+<input id="state" placeholder="Enter state" required="" type="text"/>
+</div>
+<!-- POSTAL CODE -->
+<div class="form-group">
+<label for="postalCode">
+                                Postal Code
+                                <span class="required">*</span>
+</label>
+<input id="postalCode" placeholder="Enter postal code" required="" type="text"/>
+</div>
+<!-- COUNTRY -->
+<div class="form-group">
+<label for="country">
+                                Country
+                                <span class="required">*</span>
+</label>
+<input id="country" required="" type="text" value="India"/>
+</div>
+</div>
+</form>
+</section>
+<!-- DELIVERY INFORMATION -->
+<section class="checkout-card">
+<div class="card-heading">
+<div class="card-number">
+                        2
+                    </div>
+<h2>
+                        Delivery Options
+                    </h2>
+</div>
+<div class="delivery-options">
+<label class="delivery-option selected">
+<input checked="" name="delivery" type="radio"/>
+<div>
+<strong>
+                                FREE Standard Delivery
+                            </strong>
+<p>
+                                Delivery within 3–7 business days.
+                            </p>
+</div>
+</label>
+<label class="delivery-option">
+<input name="delivery" type="radio"/>
+<div>
+<strong>
+                                Express Delivery
+                            </strong>
+<p>
+                                Faster delivery may be available for selected locations.
+                            </p>
+</div>
+</label>
+</div>
+</section>
+<!-- PAYMENT INFORMATION -->
+<section class="checkout-card">
+<div class="card-heading">
+<div class="card-number">
+                        3
+                    </div>
+<h2>
+                        Payment
+                    </h2>
+</div>
+<p class="card-description">
+                    You will select your payment method on the next step.
+                </p>
+<div class="security-box">
+
+                    🔒 Your payment information is protected by Shopora's secure checkout process.
+
+                    <br/>
+
+                    You will be redirected to the payment page after your order is created.
+
+                </div>
+</section>
+</div>
+<!-- =========================
+             RIGHT SIDE
+        ========================= -->
+<aside class="order-summary">
+<h2>
+                Order Summary
+            </h2>
+<div class="summary-message">
+
+                ✓ Your items are reserved for checkout.
+
+            </div>
+<div class="summary-row">
+<span>
+                    Items
+                </span>
+<span id="checkoutItemCount">
+                    Loading...
+                </span>
+</div>
+<div class="summary-row">
+<span>
+                    Delivery
+                </span>
+<span>
+                    FREE
+                </span>
+</div>
+<hr class="summary-divider"/>
+<div class="total-row">
+<span>
+                    Order Total
+                </span>
+<span id="checkoutTotal">
+                    Loading...
+                </span>
+</div>
+<button class="place-order-button" form="checkoutForm" id="placeOrderButton" type="submit">
+                Continue to Payment
+            </button>
+<p class="summary-note">
+
+                By continuing, you agree to Shopora's
+                terms and conditions.
+
+            </p>
+<div class="security-box">
+
+                🔒 Secure checkout
+
+                <br/>
+
+                🛡️ Your personal information is protected.
+
+                <br/>
+
+                🚚 Track your order after purchase.
+
+            </div>
+</aside>
+</div>
+</main>
+<!-- =========================
+     FOOTER
+========================= -->
+<footer>
+<div class="footer-top">
+<div class="footer-column">
+<h3>
+                Shopora
+            </h3>
+<p>
+                Your modern online shopping destination
+                for electronics, gadgets and more.
+            </p>
+</div>
+<div class="footer-column">
+<h4>
+                Shop
+            </h4>
+<a href="/">
+                Home
+            </a>
+<a href="/cart.html">
+                Cart
+            </a>
+<a href="/wishlist.html">
+                Wishlist
+            </a>
+</div>
+<div class="footer-column">
+<h4>
+                Account
+            </h4>
+<a href="/profile.html">
+                Profile
+            </a>
+<a href="/orders.html">
+                Orders
+            </a>
+</div>
+<div class="footer-column">
+<h4>
+                Help
+            </h4>
+<a href="/">
+                Customer Support
+            </a>
+<a href="/">
+                Delivery Information
+            </a>
+</div>
+</div>
+<div class="footer-bottom">
+
+        © 2026 Shopora. All rights reserved.
+
+    </div>
+</footer>
+<script src="/checkout.js"></script>
+<script src="/shopy-ui.js"></script></body>
+</html>

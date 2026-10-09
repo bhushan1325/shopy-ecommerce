@@ -1,0 +1,464 @@
+/* =========================================
+   SHOPORA ORDERS PAGE
+   ========================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fb;
+    color: #172033;
+}
+
+
+/* =========================================
+   NAVBAR
+   ========================================= */
+
+.orders-navbar {
+    background: #111827;
+    border-bottom: 1px solid #263244;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.orders-navbar-inner {
+    max-width: 1200px;
+    margin: auto;
+    min-height: 70px;
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+}
+
+.orders-logo {
+    color: #ff9900;
+    text-decoration: none;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.orders-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.orders-nav-links a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.orders-nav-links a:hover {
+    color: #ff9900;
+}
+
+
+/* =========================================
+   MAIN
+   ========================================= */
+
+.orders-main {
+    min-height: calc(100vh - 150px);
+}
+
+
+/* =========================================
+   HERO
+   ========================================= */
+
+.orders-hero {
+    background: linear-gradient(
+        135deg,
+        #111827 0%,
+        #1e293b 100%
+    );
+
+    color: white;
+}
+
+.orders-hero > div {
+    max-width: 1200px;
+    margin: auto;
+    padding: 55px 24px;
+}
+
+.orders-eyebrow {
+    margin: 0 0 10px;
+
+    color: #ff9900;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+}
+
+.orders-hero h1 {
+    margin: 0;
+
+    font-size: 42px;
+    line-height: 1.1;
+
+    color: white;
+}
+
+.orders-subtitle {
+    max-width: 650px;
+
+    margin: 14px 0 0;
+
+    color: #cbd5e1;
+
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   CONTENT
+   ========================================= */
+
+.orders-content {
+    max-width: 1200px;
+    margin: auto;
+
+    padding: 40px 24px 70px;
+}
+
+.orders-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+
+/* =========================================
+   LOADING
+   ========================================= */
+
+.orders-loading {
+    min-height: 220px;
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 15px;
+
+    color: #64748b;
+}
+
+.loading-spinner {
+    width: 38px;
+    height: 38px;
+
+    border: 4px solid #e5e7eb;
+    border-top-color: #ff9900;
+
+    border-radius: 50%;
+
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* =========================================
+   ORDER CARDS
+   ========================================= */
+
+.orders-container > div:not(.orders-loading):not(.empty-products) {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    padding: 26px;
+
+    box-shadow:
+        0 4px 18px rgba(15, 23, 42, 0.06);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.orders-container > div:not(.orders-loading):not(.empty-products):hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 25px rgba(15, 23, 42, 0.10);
+}
+
+
+/* =========================================
+   TEXT
+   ========================================= */
+
+.orders-container h2,
+.orders-container h3 {
+    color: #111827;
+}
+
+.orders-container p {
+    color: #64748b;
+}
+
+
+/* =========================================
+   BUTTONS
+   ========================================= */
+
+.orders-container button {
+    min-height: 42px;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    border: 1px solid #d1d5db;
+
+    background: white;
+
+    color: #111827;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.orders-container button:hover {
+    background: #f8fafc;
+
+    border-color: #94a3b8;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================
+   PRIMARY BUTTON
+   ========================================= */
+
+.orders-container .primary-button {
+    background: #ff9900;
+
+    border-color: #ff9900;
+
+    color: #111827;
+}
+
+.orders-container .primary-button:hover {
+    background: #e88900;
+
+    border-color: #e88900;
+}
+
+
+/* =========================================
+   EMPTY STATE
+   ========================================= */
+
+.empty-products {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    padding: 60px 25px;
+
+    text-align: center;
+
+    box-shadow:
+        0 4px 18px rgba(15, 23, 42, 0.05);
+}
+
+.empty-products h3 {
+    margin-top: 0;
+
+    font-size: 24px;
+
+    color: #111827;
+}
+
+.empty-products p {
+    margin-bottom: 25px;
+
+    color: #64748b;
+}
+
+
+/* =========================================
+   FOOTER
+   ========================================= */
+
+.orders-footer {
+    background: #111827;
+    color: #cbd5e1;
+}
+
+.orders-footer-inner {
+    max-width: 1200px;
+
+    margin: auto;
+
+    padding: 40px 24px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 40px;
+}
+
+.orders-footer-logo {
+    color: #ff9900;
+
+    font-size: 24px;
+    font-weight: 800;
+
+    margin-bottom: 10px;
+}
+
+.orders-footer p {
+    margin: 0;
+
+    max-width: 350px;
+
+    line-height: 1.6;
+
+    color: #94a3b8;
+}
+
+.orders-footer-links {
+    display: flex;
+
+    gap: 25px;
+
+    align-items: flex-start;
+
+    flex-wrap: wrap;
+}
+
+.orders-footer-links a {
+    color: #cbd5e1;
+
+    text-decoration: none;
+
+    font-size: 14px;
+}
+
+.orders-footer-links a:hover {
+    color: #ff9900;
+}
+
+.orders-footer-bottom {
+    border-top: 1px solid #263244;
+
+    text-align: center;
+
+    padding: 20px;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .orders-navbar-inner {
+        padding: 15px 18px;
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+    .orders-logo {
+        font-size: 25px;
+    }
+
+    .orders-nav-links {
+        width: 100%;
+
+        gap: 16px;
+
+        flex-wrap: wrap;
+    }
+
+    .orders-nav-links a {
+        font-size: 14px;
+    }
+
+    .orders-hero > div {
+        padding: 40px 18px;
+    }
+
+    .orders-hero h1 {
+        font-size: 32px;
+    }
+
+    .orders-subtitle {
+        font-size: 15px;
+    }
+
+    .orders-content {
+        padding: 25px 15px 50px;
+    }
+
+    .orders-container > div:not(.orders-loading):not(.empty-products) {
+        padding: 20px;
+    }
+
+    .orders-footer-inner {
+        padding: 30px 18px;
+
+        flex-direction: column;
+    }
+
+    .orders-footer-links {
+        gap: 18px;
+    }
+
+}

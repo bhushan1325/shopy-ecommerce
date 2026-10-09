@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shopora Admin Dashboard</title>
+<link href="admin.css" rel="stylesheet"/>
+<link href="/shopy-premium.css" rel="stylesheet"/></head>
+<body>
+<div class="admin-layout">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+<div class="logo">
+<span>SHOPORA</span>
+<small>ADMIN</small>
+</div>
+<nav class="sidebar-nav">
+<button class="nav-item active" onclick="showSection('dashboard', this)">
+<span>📊</span>
+                Dashboard
+            </button>
+<button class="nav-item" onclick="showSection('products', this)">
+<span>📦</span>
+                Products
+            </button>
+<button class="nav-item" onclick="showSection('categories', this)">
+<span>🗂️</span>
+                Categories
+            </button>
+<button class="nav-item" onclick="showSection('orders', this)">
+<span>🛒</span>
+                Orders
+            </button>
+<button class="nav-item" onclick="showSection('users', this)">
+<span>👥</span>
+                Users
+            </button>
+<button class="nav-item" onclick="showSection('inventory', this)">
+<span>📋</span>
+                Inventory
+            </button>
+</nav>
+<div class="sidebar-bottom">
+<button class="nav-item" onclick="goToStore()">
+<span>🏪</span>
+                View Store
+            </button>
+<button class="nav-item logout-btn" onclick="logoutAdmin()">
+<span>🚪</span>
+                Logout
+            </button>
+</div>
+</aside>
+<!-- MAIN CONTENT -->
+<main class="main-content">
+<!-- TOP BAR -->
+<header class="topbar">
+<button class="menu-button" id="menuButton" onclick="toggleSidebar()">
+                ☰
+            </button>
+<div class="topbar-title">
+<h1 id="pageTitle">Admin Dashboard</h1>
+<p>Manage your Shopora store</p>
+</div>
+<div class="admin-profile">
+<div class="admin-avatar">
+                    A
+                </div>
+<div>
+<strong id="adminName">Administrator</strong>
+<small>ADMIN</small>
+</div>
+</div>
+</header>
+<!-- ================= DASHBOARD ================= -->
+<section class="admin-section active-section" id="dashboard">
+<div class="section-heading">
+<div>
+<h2>Dashboard Overview</h2>
+<p>Here's what's happening with your store.</p>
+</div>
+<button class="primary-btn" onclick="refreshDashboard()">
+                    ↻ Refresh
+                </button>
+</div>
+<!-- STAT CARDS -->
+<div class="stats-grid">
+<div class="stat-card">
+<div class="stat-icon blue">
+                        📦
+                    </div>
+<div>
+<span>Total Products</span>
+<strong id="totalProducts">--</strong>
+<small>Products in store</small>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon green">
+                        👥
+                    </div>
+<div>
+<span>Total Users</span>
+<strong id="totalUsers">--</strong>
+<small>Registered customers</small>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon orange">
+                        🛒
+                    </div>
+<div>
+<span>Total Orders</span>
+<strong id="totalOrders">--</strong>
+<small>Orders placed</small>
+</div>
+</div>
+<div class="stat-card">
+<div class="stat-icon purple">
+                        ₹
+                    </div>
+<div>
+<span>Total Revenue</span>
+<strong id="totalRevenue">₹--</strong>
+<small>Store revenue</small>
+</div>
+</div>
+</div>
+<!-- DASHBOARD GRID -->
+<div class="dashboard-grid">
+<div class="panel">
+<div class="panel-header">
+<div>
+<h3>Recent Orders</h3>
+<p>Latest customer orders</p>
+</div>
+<button class="text-btn" onclick="showSection('orders')">
+                            View All
+                        </button>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Order ID</th>
+<th>Customer</th>
+<th>Amount</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody id="recentOrders">
+<tr>
+<td class="empty-table" colspan="4">
+                                        No order data yet
+                                    </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="panel">
+<div class="panel-header">
+<div>
+<h3>Low Stock</h3>
+<p>Products needing attention</p>
+</div>
+<button class="text-btn" onclick="showSection('inventory')">
+                            View Inventory
+                        </button>
+</div>
+<div class="low-stock-list" id="lowStockList">
+<div class="empty-state">
+<span>📦</span>
+<p>No inventory data yet</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= PRODUCTS ================= -->
+<section class="admin-section" id="products">
+<div class="section-heading">
+<div>
+<h2>Products</h2>
+<p>Manage all products in Shopora.</p>
+</div>
+<button class="primary-btn" onclick="openAddProductModal()">
+                    + Add Product
+                </button>
+</div>
+<div class="toolbar">
+<input id="productSearch" oninput="searchProducts()" placeholder="Search products..." type="text"/>
+<select id="productCategoryFilter" onchange="filterProducts()">
+<option value="">All Categories</option>
+<option value="Mobiles">Mobiles</option>
+<option value="Laptops">Laptops</option>
+<option value="Audio">Audio</option>
+<option value="Tablets">Tablets</option>
+<option value="Cameras">Cameras</option>
+</select>
+<select id="productSort" onchange="sortProducts()">
+<option value="id">Newest</option>
+<option value="name">Name</option>
+<option value="price-low">Price: Low to High</option>
+<option value="price-high">Price: High to Low</option>
+</select>
+</div>
+<div class="panel">
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Product</th>
+<th>Brand</th>
+<th>Category</th>
+<th>Price</th>
+<th>Stock</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="productsTable">
+<tr>
+<td class="empty-table" colspan="7">
+                                    Product data will appear here.
+                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- ================= CATEGORIES ================= -->
+<section class="admin-section" id="categories">
+<div class="section-heading">
+<div>
+<h2>Categories</h2>
+<p>Manage product categories.</p>
+</div>
+<button class="primary-btn" onclick="openCategoryModal()">
+                    + Add Category
+                </button>
+</div>
+<div class="category-admin-grid" id="categoryGrid">
+<div class="category-admin-card">
+<span>📱</span>
+<h3>Mobiles</h3>
+<p>Smartphones and mobile devices</p>
+<div class="category-actions">
+<button>Edit</button>
+<button class="danger-outline">Delete</button>
+</div>
+</div>
+<div class="category-admin-card">
+<span>💻</span>
+<h3>Laptops</h3>
+<p>Laptops and notebooks</p>
+<div class="category-actions">
+<button>Edit</button>
+<button class="danger-outline">Delete</button>
+</div>
+</div>
+<div class="category-admin-card">
+<span>🎧</span>
+<h3>Audio</h3>
+<p>Headphones and audio devices</p>
+<div class="category-actions">
+<button>Edit</button>
+<button class="danger-outline">Delete</button>
+</div>
+</div>
+<div class="category-admin-card">
+<span>📱</span>
+<h3>Tablets</h3>
+<p>Tablets and accessories</p>
+<div class="category-actions">
+<button>Edit</button>
+<button class="danger-outline">Delete</button>
+</div>
+</div>
+<div class="category-admin-card">
+<span>📷</span>
+<h3>Cameras</h3>
+<p>Digital cameras</p>
+<div class="category-actions">
+<button>Edit</button>
+<button class="danger-outline">Delete</button>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= ORDERS ================= -->
+<section class="admin-section" id="orders">
+<div class="section-heading">
+<div>
+<h2>Orders</h2>
+<p>View and manage customer orders.</p>
+</div>
+</div>
+<div class="toolbar">
+<input id="orderSearch" placeholder="Search orders..." type="text"/>
+<select id="orderStatusFilter">
+<option value="">All Status</option>
+<option value="PENDING">Pending</option>
+<option value="CONFIRMED">Confirmed</option>
+<option value="SHIPPED">Shipped</option>
+<option value="DELIVERED">Delivered</option>
+<option value="CANCELLED">Cancelled</option>
+</select>
+</div>
+<div class="panel">
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Order ID</th>
+<th>Customer</th>
+<th>Date</th>
+<th>Total</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="ordersTable">
+<tr>
+<td class="empty-table" colspan="6">
+                                    Order data will appear here.
+                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- ================= USERS ================= -->
+<section class="admin-section" id="users">
+<div class="section-heading">
+<div>
+<h2>Users</h2>
+<p>Manage Shopora customers.</p>
+</div>
+</div>
+<div class="toolbar">
+<input id="userSearch" placeholder="Search users..." type="text"/>
+</div>
+<div class="panel">
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Username</th>
+<th>Email</th>
+<th>Role</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="usersTable">
+<tr>
+<td class="empty-table" colspan="6">
+                                    User data will appear here.
+                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- ================= INVENTORY ================= -->
+<section class="admin-section" id="inventory">
+<div class="section-heading">
+<div>
+<h2>Inventory</h2>
+<p>Monitor product stock levels.</p>
+</div>
+</div>
+<div class="inventory-summary">
+<div class="inventory-card">
+<span>📦</span>
+<div>
+<small>Total Items</small>
+<strong id="inventoryTotal">--</strong>
+</div>
+</div>
+<div class="inventory-card">
+<span>⚠️</span>
+<div>
+<small>Low Stock</small>
+<strong id="inventoryLow">--</strong>
+</div>
+</div>
+<div class="inventory-card">
+<span>❌</span>
+<div>
+<small>Out of Stock</small>
+<strong id="inventoryOut">--</strong>
+</div>
+</div>
+</div>
+<div class="panel">
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Brand</th>
+<th>Stock</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="inventoryTable">
+<tr>
+<td class="empty-table" colspan="5">
+                                    Inventory data will appear here.
+                                </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- ================= PRODUCT MODAL ================= -->
+<div class="modal-overlay" id="productModal">
+<div class="modal">
+<div class="modal-header">
+<div>
+<h2 id="productModalTitle">Add Product</h2>
+<p id="productModalDescription">
+                    Create a new Shopora product.
+                </p>
+</div>
+<button class="close-modal" onclick="closeProductModal()">
+                ×
+            </button>
+</div>
+<form id="productForm">
+<!-- Hidden ID used when editing -->
+<input id="editingProductId" type="hidden"/>
+<div class="form-grid">
+<div class="form-group">
+<label>Product Name</label>
+<input id="productName" required="" type="text"/>
+</div>
+<div class="form-group">
+<label>Brand</label>
+<input id="productBrand" required="" type="text"/>
+</div>
+<div class="form-group">
+<label>Price</label>
+<input id="productPrice" min="0" required="" step="0.01" type="number"/>
+</div>
+<div class="form-group">
+<label>Stock</label>
+<input id="productStock" min="0" required="" type="number"/>
+</div>
+<div class="form-group full-width">
+<label>Image URL</label>
+<input id="productImage" placeholder="https://example.com/product.jpg" type="url"/>
+</div>
+<div class="form-group full-width">
+<label>Description</label>
+<textarea id="productDescription" rows="4"></textarea>
+</div>
+<div class="form-group">
+<label>Category</label>
+<select id="productCategory" required="">
+<option value="">
+                            Select Category
+                        </option>
+<option value="1">
+                            Electronics
+                        </option>
+<option value="2">
+                            Mobiles
+                        </option>
+<option value="3">
+                            Laptops
+                        </option>
+<option value="4">
+                            Audio
+                        </option>
+<option value="5">
+                            Tablets
+                        </option>
+<option value="6">
+                            Cameras
+                        </option>
+</select>
+</div>
+</div>
+<div class="modal-actions">
+<button class="secondary-btn" onclick="closeProductModal()" type="button">
+                    Cancel
+                </button>
+<button class="primary-btn" id="productSubmitButton" type="submit">
+                    Add Product
+                </button>
+</div>
+</form>
+</div>
+</div>
+<!-- ================= CATEGORY MODAL ================= -->
+<div class="modal-overlay" id="categoryModal">
+<div class="modal small-modal">
+<div class="modal-header">
+<div>
+<h2>Add Category</h2>
+<p>Create a new product category.</p>
+</div>
+<button class="close-modal" onclick="closeCategoryModal()">
+                ×
+            </button>
+</div>
+<form id="categoryForm">
+<div class="form-group">
+<label>Category Name</label>
+<input id="categoryName" placeholder="Example: Smart Watches" required="" type="text"/>
+</div>
+<div class="form-group">
+<label>Description</label>
+<textarea id="categoryDescription" placeholder="Category description" rows="4"></textarea>
+</div>
+<div class="modal-actions">
+<button class="secondary-btn" onclick="closeCategoryModal()" type="button">
+                    Cancel
+                </button>
+<button class="primary-btn" type="submit">
+                    Add Category
+                </button>
+</div>
+</form>
+</div>
+</div>
+<script src="admin.js"></script>
+<script src="/shopy-ui.js"></script></body>
+</html>

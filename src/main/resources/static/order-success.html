@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>
+        Order Confirmed - Shopora
+    </title>
+<link href="style.css" rel="stylesheet"/>
+<link href="/shopy-premium.css" rel="stylesheet"/></head>
+<body>
+<header class="navbar">
+<div class="logo">
+        Shopora
+    </div>
+<nav class="nav-links">
+<a href="/">
+            Home
+        </a>
+<a href="/cart.html">
+            Cart 🛒
+        </a>
+<a href="/wishlist.html">
+            Wishlist ❤️
+        </a>
+</nav>
+</header>
+<main>
+<section class="cart-page">
+<div class="cart-total" style="
+                text-align:center;
+                padding:50px 25px;
+            ">
+<div style="
+                    font-size:70px;
+                    margin-bottom:20px;
+                ">
+                ✅
+            </div>
+<h1 style="
+                    margin-bottom:10px;
+                    color:#16803c;
+                ">
+                Order Confirmed!
+            </h1>
+<p style="
+                    color:#6b7280;
+                    margin-bottom:30px;
+                ">
+                Thank you for shopping with Shopora.
+            </p>
+<div id="orderDetails" style="
+                    max-width:550px;
+                    margin:0 auto 30px;
+                    text-align:left;
+                    background:#f9fafb;
+                    padding:25px;
+                    border-radius:8px;
+                ">
+                Loading order details...
+            </div>
+<div style="
+                    display:flex;
+                    gap:12px;
+                    justify-content:center;
+                    flex-wrap:wrap;
+                ">
+<button class="primary-button" onclick="trackOrder()">
+                    Track Order
+                </button>
+<button onclick="viewOrders()" style="
+                        padding:13px 22px;
+                        border:1px solid #d1d5db;
+                        background:white;
+                        border-radius:6px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    ">
+                    My Orders
+                </button>
+<button onclick="continueShopping()" style="
+                        padding:13px 22px;
+                        border:1px solid #d1d5db;
+                        background:white;
+                        border-radius:6px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    ">
+                    Continue Shopping
+                </button>
+</div>
+</div>
+</section>
+</main>
+<footer>
+<div class="footer-content">
+<div>
+<h3>
+                Shopora
+            </h3>
+<p>
+                Your simple and reliable
+                online shopping destination.
+            </p>
+</div>
+</div>
+<div class="footer-bottom">
+<p>
+            © 2026 Shopora. All rights reserved.
+        </p>
+</div>
+</footer>
+<script src="order-success.js"></script>
+<script src="/shopy-ui.js"></script></body>
+</html>

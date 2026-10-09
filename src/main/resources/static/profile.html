@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Profile - Shopora</title>
+<link href="style.css" rel="stylesheet"/>
+<link href="/shopy-brand.css" rel="stylesheet"/>
+<style>
+
+        .profile-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .profile-title {
+            margin-bottom: 25px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .profile-card h2 {
+            margin-bottom: 20px;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .profile-form label {
+            font-weight: 600;
+        }
+
+        .profile-form input,
+        .profile-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            box-sizing: border-box;
+        }
+
+        .profile-form textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .profile-btn {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 600;
+            background: #111827;
+            color: white;
+        }
+
+        .profile-btn:hover {
+            opacity: 0.9;
+        }
+
+        .danger-btn {
+            background: #dc2626;
+        }
+
+        .secondary-btn {
+            background: #4b5563;
+        }
+
+        .address-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .address-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .address-card strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .address-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .account-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .account-links a,
+        .account-links button {
+            display: block;
+            padding: 12px;
+            border-radius: 7px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            background: #f3f4f6;
+            color: #111827;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .account-links a:hover,
+        .account-links button:hover {
+            background: #e5e7eb;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .address-form {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: auto;
+            }
+
+            .profile-container {
+                padding: 15px;
+            }
+        }
+
+    </style>
+<link href="/shopy-premium.css" rel="stylesheet"/></head>
+<body>
+<header>
+<nav>
+<a href="index.html">Home</a>
+<a href="orders.html">My Orders</a>
+<a href="wishlist.html">Wishlist ❤️</a>
+<a href="cart.html">Cart 🛒</a>
+</nav>
+</header>
+<main class="profile-container">
+<h1 class="profile-title">
+        My Profile
+    </h1>
+<div class="profile-grid">
+<!-- PROFILE -->
+<section class="profile-card">
+<h2>Account Information</h2>
+<form class="profile-form" id="profileForm">
+<label for="name">
+                    Full Name
+                </label>
+<input id="name" required="" type="text"/>
+<label for="username">
+                    Username
+                </label>
+<input disabled="" id="username" type="text"/>
+<label for="email">
+                    Email
+                </label>
+<input id="email" required="" type="email"/>
+<button class="profile-btn" type="submit">
+
+                    Save Changes
+
+                </button>
+</form>
+</section>
+<!-- ACCOUNT LINKS -->
+<section class="profile-card">
+<h2>My Account</h2>
+<div class="account-links">
+<a href="orders.html">
+                    📦 My Orders
+                </a>
+<a href="wishlist.html">
+                    ❤️ My Wishlist
+                </a>
+<button id="logoutBtn" type="button">
+
+                    🚪 Logout
+
+                </button>
+</div>
+</section>
+<!-- ADDRESS -->
+<section class="profile-card full-width">
+<h2>My Addresses</h2>
+<div class="address-list" id="addressList">
+<p>
+                    Loading addresses...
+                </p>
+</div>
+<button class="profile-btn" id="addAddressBtn" style="margin-top:20px;" type="button">
+
+                + Add New Address
+
+            </button>
+<div class="address-form hidden" id="addressFormContainer">
+<h3 id="addressFormTitle">
+                    Add Address
+                </h3>
+<form class="profile-form" id="addressForm">
+<input id="addressId" type="hidden"/>
+<label>
+                        Full Name
+                    </label>
+<input id="addressFullName" required="" type="text"/>
+<label>
+                        Phone
+                    </label>
+<input id="addressPhone" required="" type="tel"/>
+<label>
+                        Address
+                    </label>
+<textarea id="addressLine" required="">
+                    </textarea>
+<label>
+                        City
+                    </label>
+<input id="addressCity" required="" type="text"/>
+<label>
+                        State
+                    </label>
+<input id="addressState" required="" type="text"/>
+<label>
+                        Postal Code
+                    </label>
+<input id="addressPostalCode" required="" type="text"/>
+<label>
+                        Country
+                    </label>
+<input id="addressCountry" required="" type="text" value="India"/>
+<div class="address-actions">
+<button class="profile-btn" type="submit">
+
+                            Save Address
+
+                        </button>
+<button class="profile-btn secondary-btn" id="cancelAddressBtn" type="button">
+
+                            Cancel
+
+                        </button>
+</div>
+</form>
+</div>
+</section>
+</div>
+</main>
+<footer>
+<p>
+        © 2026 Shopora. All rights reserved.
+    </p>
+</footer>
+<script src="profile.js"></script>
+<script src="/shopy-ui.js"></script></body>
+</html>

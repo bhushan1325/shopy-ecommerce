@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="SHOPY — Style for Every Generation" name="description"/>
+<title>SHOPY — Style for Every Generation</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;1,500&amp;display=swap" rel="stylesheet"/>
+<link href="/style.css" rel="stylesheet"/>
+<link href="/shopy-brand.css" rel="stylesheet"/>
+<link href="/shopy-premium.css" rel="stylesheet"/></head>
+<body>
+<div class="announcement">FREE SHIPPING ON ORDERS OVER ₹1,999 <b>•</b> EASY RETURNS</div>
+<header class="site-header">
+<div class="nav">
+<button aria-label="Open menu" class="mobile icon-btn" id="menuBtn">
+<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+</button>
+<a aria-label="SHOPY home" class="logo" href="/">SHOPY<span>.</span></a>
+<nav aria-label="Main navigation">
+<a href="/?category=Women">Women</a>
+<a href="/?category=Men">Men</a>
+<a href="/?category=Teens">Teens</a>
+<a href="/?category=Kids">Kids</a>
+<a href="/?category=Babies">Babies</a>
+<a href="/?category=Accessories">Accessories</a>
+<a class="sale" href="/?sale=true">Sale</a>
+</nav>
+<div class="actions">
+<button aria-label="Search" class="icon-btn" id="searchBtn">
+<svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
+</button>
+<a aria-label="Wishlist" class="icon-btn count-link" href="/wishlist.html">
+<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 1 12 5.7a4.8 4.8 0 0 1 8.8 3.1Z"></path></svg>
+<i id="wishCount">0</i>
+</a>
+<a aria-label="Shopping bag" class="icon-btn count-link" href="/cart.html">
+<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M5 8.5h14l-1 12H6l-1-12Z"></path><path d="M9 9V6a3 3 0 0 1 6 0v3"></path></svg>
+<i id="cartCount">0</i>
+</a>
+<a class="account-link" href="/login.html" id="account">Account</a>
+</div>
+</div>
+<div class="mobileNav" id="mobileNav">
+<a href="/?category=Women">Women</a><a href="/?category=Men">Men</a>
+<a href="/?category=Teens">Teens</a><a href="/?category=Kids">Kids</a>
+<a href="/?category=Babies">Babies</a><a href="/?category=Accessories">Accessories</a>
+<a href="/?sale=true">Sale</a>
+</div>
+<div class="search" id="searchBox">
+<form id="searchForm">
+<input autocomplete="off" id="searchInput" placeholder="Search products, styles, brands..."/>
+<button aria-label="Submit search">Search</button>
+</form>
+<small>Trending:
+      <button data-q="hoodie">Hoodies</button>
+<button data-q="dress">Dresses</button>
+<button data-q="jeans">Jeans</button>
+<button data-q="bags">Bags</button>
+</small>
+</div>
+</header>
+<main>
+<section class="hero">
+<div class="heroCopy">
+<p class="eyebrow">THE NEW SEASON / 2026</p>
+<h1>Style made<br/><em>for every</em><br/>generation.</h1>
+<p>Curated fashion, effortless essentials and statement pieces for every age.</p>
+<div>
+<a class="btn dark" href="#new">SHOP NEW ARRIVALS</a>
+<a class="under" href="/?sale=true">EXPLORE SALE →</a>
+</div>
+</div>
+<div class="heroImg">
+<img alt="Fashion editorial" src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&amp;fit=crop&amp;w=1400&amp;q=85"/>
+<span>01 / NEW SEASON EDIT</span>
+</div>
+</section>
+<section class="section">
+<div class="heading">
+<div><p class="eyebrow">SHOP YOUR WAY</p><h2>Made for every age.</h2></div>
+<a class="under" href="/?category=all">VIEW ALL →</a>
+</div>
+<div class="ages">
+<a class="age women" href="/?category=Women"><b>Women</b><small>01</small></a>
+<a class="age men" href="/?category=Men"><b>Men</b><small>02</small></a>
+<a class="age teens" href="/?category=Teens"><b>Teens</b><small>03</small></a>
+<a class="age kids" href="/?category=Kids"><b>Kids</b><small>04</small></a>
+<a class="age babies" href="/?category=Babies"><b>Babies</b><small>05</small></a>
+</div>
+</section>
+<section class="editorial">
+<img alt="SHOPY fashion collection" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&amp;fit=crop&amp;w=1200&amp;q=85"/>
+<div>
+<p class="eyebrow">THE SHOPY EDIT</p>
+<h2>Less noise.<br/><em>More style.</em></h2>
+<p>Timeless silhouettes, considered details and pieces you'll actually want to wear beyond a single season.</p>
+<a class="btn outline" href="#new">DISCOVER THE EDIT</a>
+</div>
+</section>
+<section class="section" id="new">
+<div class="heading">
+<div><p class="eyebrow">JUST DROPPED</p><h2>New arrivals.</h2></div>
+<a class="under" href="/?sort=newest">SHOP ALL →</a>
+</div>
+<div class="products" id="products">
+<div class="loader"></div><div class="loader"></div><div class="loader"></div><div class="loader"></div>
+</div>
+</section>
+<section class="statement">
+<p class="eyebrow">SHOPY / 01</p>
+<h2>Good style<br/><em>has no age.</em></h2>
+</section>
+<section class="services">
+<div><b>FREE SHIPPING</b><span>On orders over ₹1,999</span></div>
+<div><b>EASY RETURNS</b><span>Simple returns on eligible items</span></div>
+<div><b>SECURE CHECKOUT</b><span>Protected payment flow</span></div>
+<div><b>MADE FOR YOU</b><span>Fashion across every generation</span></div>
+</section>
+</main>
+<footer>
+<div class="footerGrid">
+<div><a class="logo light" href="/">SHOPY<span>.</span></a><p>Style for every generation.</p></div>
+<div><b>SHOP</b><a href="/?category=Women">Women</a><a href="/?category=Men">Men</a><a href="/?category=Teens">Teens</a><a href="/?category=Kids">Kids</a><a href="/?category=Babies">Babies</a></div>
+<div><b>HELP</b><a href="/orders.html">Orders</a><a href="/tracking.html">Track order</a><a href="/profile.html">My account</a><a href="/wishlist.html">Wishlist</a></div>
+<div><b>STAY IN THE LOOP</b><p>New drops, edits and offers. No spam.</p><form id="news"><input placeholder="Your email" required="" type="email"/><button aria-label="Subscribe">→</button></form></div>
+</div>
+<div class="bottom">© 2026 SHOPY <span>Style for every generation.</span></div>
+</footer>
+<div class="toast" id="toast"></div>
+<script src="/shopy-brand.js"></script>
+<script src="/script.js"></script>
+<script src="/shopy-ui.js"></script></body>
+</html>
