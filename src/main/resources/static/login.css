@@ -1,1366 +1,402 @@
-/* =====================================================
-   SHOPORA LOGIN PAGE
-   ===================================================== */
+/* ==========================================================================
+   SHOPY — CLIENT AUTHENTICATION & ACCESS (login.css)
+   Gucci Couture Luxury Aesthetic x Modern Editorial Usability
+   ========================================================================== */
 
-
-/* =====================================================
-   RESET
-   ===================================================== */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+.auth-body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: var(--shopy-font-sans, 'DM Sans', sans-serif);
+  color: var(--shopy-ink, #111111);
+  background-color: var(--shopy-paper, #F8F6F0);
+  -webkit-font-smoothing: antialiased;
 }
 
-
-html {
-    scroll-behavior: smooth;
+/* Two-column split-screen layout */
+.auth-split-wrapper {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  min-height: 100vh;
 }
 
-
-body {
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    background:
-        linear-gradient(
-            135deg,
-            #eef3ff 0%,
-            #f8faff 50%,
-            #edf2ff 100%
-        );
-
-    color: #172033;
-
-    min-height: 100vh;
-
+/* --------------------------------------------------------------------------
+   LEFT: HIGH-FASHION EDITORIAL CAMPAIGN PANEL
+   -------------------------------------------------------------------------- */
+.auth-editorial-panel {
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1400&q=85');
+  background-size: cover;
+  background-position: center 25%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px 48px;
+  overflow: hidden;
+  color: #FFFFFF;
 }
 
-
-
-/* =====================================================
-   NAVBAR
-   ===================================================== */
-
-.login-navbar {
-
-    height: 78px;
-
-    background: #111827;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding: 0 6%;
-
-    border-bottom:
-        1px solid #263244;
-
+/* Luxury Multi-tone Atmospheric Overlay (Gucci Forest Green & Rosso Ancora) */
+.auth-editorial-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(17, 17, 17, 0.45) 0%,
+    rgba(19, 56, 44, 0.55) 45%,
+    rgba(100, 31, 43, 0.88) 100%
+  );
+  z-index: 1;
 }
 
-
-.shopora-logo {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    color: white;
-
-    text-decoration: none;
-
-    font-size: 27px;
-
-    font-weight: 900;
-
-    letter-spacing: -0.5px;
-
+.auth-editorial-panel > * {
+  position: relative;
+  z-index: 2;
 }
 
-
-.logo-bag {
-
-    width: 38px;
-
-    height: 42px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #2563eb,
-            #4f46e5
-        );
-
-    border-radius: 8px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    position: relative;
-
-    box-shadow:
-        0 7px 18px
-        rgba(37, 99, 235, 0.35);
-
+/* Campaign Badge */
+.editorial-crest {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(17, 17, 17, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(197, 168, 128, 0.4);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: #F8F6F0;
+  width: fit-content;
 }
 
-
-.logo-bag::before {
-
-    content: "";
-
-    position: absolute;
-
-    width: 17px;
-
-    height: 11px;
-
-    border:
-        3px solid #2563eb;
-
-    border-bottom: none;
-
-    border-radius:
-        12px 12px 0 0;
-
-    top: -9px;
-
+.editorial-crest .crest-gold {
+  color: var(--shopy-gold, #C5A880);
 }
 
-
-.logo-bag span {
-
-    font-size: 19px;
-
-    font-weight: 900;
-
+/* Editorial Typography */
+.editorial-quote-block {
+  max-width: 480px;
+  margin-top: auto;
+  margin-bottom: 32px;
 }
 
-
-.home-link {
-
-    color: #cbd5e1;
-
-    text-decoration: none;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    transition: 0.2s;
-
+.editorial-quote-title {
+  font-family: var(--shopy-font-serif, 'Playfair Display', serif);
+  font-size: clamp(38px, 3.8vw, 56px);
+  font-weight: 500;
+  letter-spacing: -1.5px;
+  line-height: 1.05;
+  margin: 0 0 16px;
 }
 
-
-.home-link:hover {
-
-    color: white;
-
+.editorial-quote-title em {
+  font-style: italic;
+  font-weight: 400;
+  color: #F8F6F0;
 }
 
-
-
-/* =====================================================
-   PAGE
-   ===================================================== */
-
-.login-page {
-
-    min-height:
-        calc(100vh - 128px);
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding:
-        50px 25px;
-
+.editorial-quote-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(248, 246, 240, 0.88);
+  margin: 0;
 }
 
-
-
-/* =====================================================
-   MAIN CONTAINER
-   ===================================================== */
-
-.login-container {
-
-    width: 100%;
-
-    max-width: 1120px;
-
-    min-height: 650px;
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    background: white;
-
-    border-radius: 24px;
-
-    overflow: hidden;
-
-    border:
-        1px solid #e2e8f0;
-
-    box-shadow:
-        0 30px 70px
-        rgba(15, 23, 42, 0.14);
-
+.editorial-footer-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(248, 246, 240, 0.7);
+  border-top: 1px solid rgba(248, 246, 240, 0.2);
+  padding-top: 18px;
 }
 
-
-
-/* =====================================================
-   LEFT PANEL
-   ===================================================== */
-
-.brand-panel {
-
-    position: relative;
-
-    overflow: hidden;
-
-    padding:
-        65px 65px;
-
-    color: white;
-
-    background:
-
-        radial-gradient(
-            circle at 85% 15%,
-            rgba(37, 99, 235, 0.35),
-            transparent 30%
-        ),
-
-        radial-gradient(
-            circle at 15% 90%,
-            rgba(79, 70, 229, 0.22),
-            transparent 30%
-        ),
-
-        linear-gradient(
-            145deg,
-            #0f172a,
-            #111827
-        );
-
+/* --------------------------------------------------------------------------
+   RIGHT: AUTHENTICATION FORM PANEL
+   -------------------------------------------------------------------------- */
+.auth-form-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 56px;
+  background-color: var(--shopy-paper, #F8F6F0);
+  overflow-y: auto;
 }
 
-
-
-/* Decorative circles */
-
-.brand-panel::before {
-
-    content: "";
-
-    position: absolute;
-
-    width: 330px;
-
-    height: 330px;
-
-    border-radius: 50%;
-
-    border:
-        1px solid
-        rgba(96, 165, 250, 0.18);
-
-    right: -140px;
-
-    bottom: -120px;
-
+/* Top Navigation */
+.auth-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 36px;
 }
 
-
-.brand-panel::after {
-
-    content: "";
-
-    position: absolute;
-
-    width: 180px;
-
-    height: 180px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(37, 99, 235, 0.07);
-
-    left: -80px;
-
-    top: 80px;
-
+.auth-brand-logo {
+  font-family: var(--shopy-font-sans, 'DM Sans', sans-serif);
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  text-transform: uppercase;
+  color: var(--shopy-ink, #111111);
+  text-decoration: none;
 }
 
-
-.brand-content {
-
-    position: relative;
-
-    z-index: 3;
-
+.auth-brand-logo span.dot {
+  color: var(--shopy-wine, #641F2B);
+  font-size: 28px;
 }
 
-
-
-/* =====================================================
-   BADGE
-   ===================================================== */
-
-.welcome-badge {
-
-    display: inline-block;
-
-    padding:
-        8px 13px;
-
-    border:
-        1px solid
-        rgba(96, 165, 250, 0.30);
-
-    background:
-        rgba(37, 99, 235, 0.12);
-
-    border-radius: 30px;
-
-    color: #93c5fd;
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    letter-spacing: 2px;
-
-    margin-bottom: 28px;
-
+.auth-back-link {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--shopy-ink, #111111);
+  text-decoration: none;
+  border-bottom: 1.5px solid var(--shopy-ink, #111111);
+  padding-bottom: 2px;
+  transition: all 180ms ease;
 }
 
-
-
-/* =====================================================
-   LARGE LOGO
-   ===================================================== */
-
-.large-logo {
-
-    margin-bottom: 22px;
-
+.auth-back-link:hover {
+  color: var(--shopy-wine, #641F2B);
+  border-bottom-color: var(--shopy-wine, #641F2B);
 }
 
-
-.large-logo-bag {
-
-    width: 75px;
-
-    height: 82px;
-
-    border-radius: 14px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #2563eb,
-            #4f46e5
-        );
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    position: relative;
-
-    box-shadow:
-        0 15px 35px
-        rgba(37, 99, 235, 0.30);
-
+/* Form Card Container */
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  border: 1px solid var(--shopy-line, #E6E1D5);
+  border-top: 4px solid var(--shopy-wine, #641F2B);
+  border-radius: 8px;
+  padding: 38px 34px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.04);
 }
 
-
-.large-logo-bag::before {
-
-    content: "";
-
-    position: absolute;
-
-    width: 34px;
-
-    height: 22px;
-
-    border:
-        6px solid #2563eb;
-
-    border-bottom: none;
-
-    border-radius:
-        25px 25px 0 0;
-
-    top: -18px;
-
+.auth-eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--shopy-wine, #641F2B);
+  margin: 0 0 8px;
+  display: block;
 }
 
-
-.large-logo-bag span {
-
-    font-size: 38px;
-
-    font-weight: 900;
-
+.auth-title {
+  font-family: var(--shopy-font-serif, 'Playfair Display', serif);
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: -0.8px;
+  margin: 0 0 10px;
+  color: var(--shopy-ink, #111111);
 }
 
-
-
-/* =====================================================
-   LEFT HEADING
-   ===================================================== */
-
-.brand-content h1 {
-
-    font-size: 48px;
-
-    line-height: 1.05;
-
-    letter-spacing: -2px;
-
-    margin-bottom: 23px;
-
+.auth-subtitle {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--shopy-muted, #6E6B65);
+  margin: 0 0 24px;
 }
 
-
-.brand-content h1 span {
-
-    display: block;
-
-    color: #60a5fa;
-
+/* Demo Credentials Quick-Fill Bar */
+.demo-access-box {
+  background: var(--shopy-surface, #FAF8F5);
+  border: 1px dashed var(--shopy-line, #E6E1D5);
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 22px;
 }
 
-
-
-/* =====================================================
-   DESCRIPTION
-   ===================================================== */
-
-.brand-description {
-
-    max-width: 440px;
-
-    color: #cbd5e1;
-
-    font-size: 15px;
-
-    line-height: 1.8;
-
-    margin-bottom: 34px;
-
+.demo-access-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--shopy-green, #13382C);
+  margin-bottom: 8px;
 }
 
-
-
-/* =====================================================
-   BENEFITS
-   ===================================================== */
-
-.benefits {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 17px;
-
+.demo-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-
-.benefit {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
+.demo-btn-pill {
+  background: #FFFFFF;
+  border: 1px solid var(--shopy-line, #E6E1D5);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--shopy-ink, #111111);
+  cursor: pointer;
+  transition: all 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
-
-.benefit-icon {
-
-    width: 34px;
-
-    height: 34px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background:
-        rgba(37, 99, 235, 0.20);
-
-    border:
-        1px solid
-        rgba(96, 165, 250, 0.20);
-
-    color: #60a5fa;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-size: 14px;
-
-    font-weight: 900;
-
+.demo-btn-pill:hover {
+  background-color: var(--shopy-wine, #641F2B);
+  border-color: var(--shopy-wine, #641F2B);
+  color: #FFFFFF;
+  transform: translateY(-1px);
 }
 
-
-.benefit strong {
-
-    display: block;
-
-    font-size: 13px;
-
-    margin-bottom: 3px;
-
-}
-
-
-.benefit small {
-
-    color: #94a3b8;
-
-    font-size: 11px;
-
-}
-
-
-
-/* =====================================================
-   DECORATIVE SHOPPING OBJECTS
-   ===================================================== */
-
-.shopping-decoration {
-
-    position: absolute;
-
-    right: 30px;
-
-    bottom: 25px;
-
-    width: 260px;
-
-    height: 160px;
-
-    opacity: 0.8;
-
-}
-
-
-.floating-box {
-
-    position: absolute;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    font-weight: 900;
-
-}
-
-
-.box-one {
-
-    width: 120px;
-
-    height: 80px;
-
-    right: 30px;
-
-    bottom: 5px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #2563eb,
-            #1d4ed8
-        );
-
-    border-radius: 9px;
-
-    transform:
-        rotate(-8deg);
-
-    color: white;
-
-    box-shadow:
-        0 15px 30px
-        rgba(0, 0, 0, 0.2);
-
-}
-
-
-.box-two {
-
-    width: 65px;
-
-    height: 65px;
-
-    right: 130px;
-
-    bottom: 65px;
-
-    background: #60a5fa;
-
-    border-radius: 10px;
-
-    transform:
-        rotate(12deg);
-
-    color: white;
-
-    font-size: 25px;
-
-}
-
-
-.box-three {
-
-    width: 45px;
-
-    height: 45px;
-
-    right: 190px;
-
-    bottom: 15px;
-
-    background: #4f46e5;
-
-    border-radius: 50%;
-
-    color: white;
-
-}
-
-
-
-/* =====================================================
-   RIGHT LOGIN PANEL
-   ===================================================== */
-
-.login-panel {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding:
-        60px 65px;
-
-    background: white;
-
-}
-
-
-.login-card {
-
-    width: 100%;
-
-    max-width: 410px;
-
-}
-
-
-
-/* =====================================================
-   LOGIN BRAND
-   ===================================================== */
-
-.login-brand {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    margin-bottom: 32px;
-
-    font-size: 24px;
-
-    font-weight: 900;
-
-    color: #172033;
-
-}
-
-
-.small-logo {
-
-    width: 42px;
-
-    height: 46px;
-
-    border-radius: 9px;
-
-    background:
-        linear-gradient(
-            145deg,
-            #2563eb,
-            #4f46e5
-        );
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    color: white;
-
-    font-size: 20px;
-
-    font-weight: 900;
-
-    position: relative;
-
-}
-
-
-.small-logo::before {
-
-    content: "";
-
-    position: absolute;
-
-    width: 18px;
-
-    height: 11px;
-
-    border:
-        3px solid #2563eb;
-
-    border-bottom: none;
-
-    border-radius:
-        14px 14px 0 0;
-
-    top: -9px;
-
-}
-
-
-
-/* =====================================================
-   LOGIN TITLE
-   ===================================================== */
-
-.login-card h2 {
-
-    font-size: 34px;
-
-    letter-spacing: -1px;
-
-    color: #111827;
-
-    margin-bottom: 7px;
-
-}
-
-
-.login-description {
-
-    color: #64748b;
-
-    font-size: 13px;
-
-    line-height: 1.6;
-
-    margin-bottom: 30px;
-
-}
-
-
-
-/* =====================================================
-   FORM
-   ===================================================== */
-
+/* Form Groups & Inputs */
 .form-group {
-
-    margin-bottom: 21px;
-
+  margin-bottom: 18px;
 }
 
-
-.form-group label {
-
-    display: block;
-
-    color: #334155;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    margin-bottom: 8px;
-
+.form-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--shopy-ink, #111111);
+  margin-bottom: 6px;
 }
 
-
-.input-container {
-
-    position: relative;
-
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-
-.input-icon {
-
-    position: absolute;
-
-    left: 15px;
-
-    top: 50%;
-
-    transform:
-        translateY(-50%);
-
-    font-size: 15px;
-
-    opacity: 0.55;
-
-    pointer-events: none;
-
+.form-input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--shopy-line, #E6E1D5);
+  border-radius: 4px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: var(--shopy-ink, #111111);
+  background-color: #FFFFFF;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+  box-sizing: border-box;
 }
 
-
-.input-container input {
-
-    width: 100%;
-
-    height: 52px;
-
-    border:
-        1px solid #d8dee8;
-
-    border-radius: 9px;
-
-    outline: none;
-
-    background: #f8fafc;
-
-    padding:
-        0 15px 0 45px;
-
-    font-size: 13px;
-
-    color: #172033;
-
-    transition: 0.2s;
-
+.form-input:focus {
+  border-color: var(--shopy-ink, #111111);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
 }
 
-
-.input-container input::placeholder {
-
-    color: #9ca3af;
-
+.btn-toggle-pw {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--shopy-muted, #6E6B65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 160ms ease;
 }
 
-
-.input-container input:hover {
-
-    border-color: #b9c3d1;
-
+.btn-toggle-pw:hover {
+  color: var(--shopy-ink, #111111);
 }
 
-
-.input-container input:focus {
-
-    background: white;
-
-    border-color: #2563eb;
-
-    box-shadow:
-        0 0 0 4px
-        rgba(37, 99, 235, 0.10);
-
+/* Submit Button */
+.btn-auth-submit {
+  width: 100%;
+  height: 50px;
+  margin-top: 10px;
+  background-color: var(--shopy-ink, #111111);
+  color: #FFFFFF;
+  border: 1px solid var(--shopy-ink, #111111);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 200ms ease;
 }
 
-
-
-/* =====================================================
-   LOGIN BUTTON
-   ===================================================== */
-
-.login-button {
-
-    width: 100%;
-
-    height: 53px;
-
-    margin-top: 5px;
-
-    border: none;
-
-    border-radius: 9px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #4f46e5
-        );
-
-    color: white;
-
-    cursor: pointer;
-
-    font-size: 13px;
-
-    font-weight: 800;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 12px;
-
-    box-shadow:
-        0 10px 25px
-        rgba(37, 99, 235, 0.22);
-
-    transition:
-        0.2s;
-
+.btn-auth-submit:hover {
+  background-color: var(--shopy-wine, #641F2B);
+  border-color: var(--shopy-wine, #641F2B);
+  box-shadow: 0 8px 24px rgba(100, 31, 43, 0.25);
+  transform: translateY(-1px);
 }
 
-
-.login-button:hover {
-
-    transform:
-        translateY(-2px);
-
-    box-shadow:
-        0 14px 30px
-        rgba(37, 99, 235, 0.30);
-
+.btn-auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
 }
 
-
-.login-button:active {
-
-    transform:
-        translateY(0);
-
+/* Card Footer */
+.auth-switch-box {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--shopy-muted, #6E6B65);
+  border-top: 1px solid var(--shopy-line, #E6E1D5);
+  padding-top: 18px;
 }
 
-
-.button-arrow {
-
-    font-size: 19px;
-
-    transition: 0.2s;
-
+.auth-switch-link {
+  color: var(--shopy-wine, #641F2B);
+  font-weight: 700;
+  text-decoration: underline;
+  transition: opacity 160ms ease;
 }
 
-
-.login-button:hover .button-arrow {
-
-    transform:
-        translateX(4px);
-
+.auth-switch-link:hover {
+  opacity: 0.8;
 }
 
-
-
-/* =====================================================
-   DIVIDER
-   ===================================================== */
-
-.divider {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 14px;
-
-    margin:
-        28px 0;
-
+/* Bottom Guarantees */
+.auth-trust-footer {
+  margin-top: 36px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--shopy-muted, #6E6B65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-
-.divider span {
-
-    height: 1px;
-
-    flex: 1;
-
-    background: #e5e7eb;
-
+.auth-trust-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-
-.divider strong {
-
-    color: #94a3b8;
-
-    font-size: 10px;
-
-}
-
-
-
-/* =====================================================
-   REGISTER
-   ===================================================== */
-
-.register-section {
-
-    text-align: center;
-
-    margin-bottom: 26px;
-
-}
-
-
-.register-section p {
-
-    color: #64748b;
-
-    font-size: 12px;
-
-    margin-bottom: 7px;
-
-}
-
-
-.register-section a {
-
-    color: #2563eb;
-
-    text-decoration: none;
-
-    font-size: 13px;
-
-    font-weight: 800;
-
-}
-
-
-.register-section a:hover {
-
-    text-decoration: underline;
-
-}
-
-
-.register-section a span {
-
-    margin-left: 4px;
-
-}
-
-
-
-/* =====================================================
-   SECURITY
-   ===================================================== */
-
-.security-box {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 10px;
-
-    background: #f8fafc;
-
-    border:
-        1px solid #e2e8f0;
-
-    border-radius: 9px;
-
-    padding: 11px;
-
-}
-
-
-.security-icon {
-
-    font-size: 17px;
-
-}
-
-
-.security-box strong {
-
-    display: block;
-
-    font-size: 10px;
-
-    color: #475569;
-
-    margin-bottom: 2px;
-
-}
-
-
-.security-box small {
-
-    display: block;
-
-    font-size: 9px;
-
-    color: #94a3b8;
-
-}
-
-
-
-/* =====================================================
-   FOOTER
-   ===================================================== */
-
-.login-footer {
-
-    height: 50px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 25px;
-
-    color: #94a3b8;
-
-    font-size: 10px;
-
-}
-
-
-
-/* =====================================================
-   TABLET
-   ===================================================== */
-
-@media (max-width: 950px) {
-
-    .login-container {
-
-        grid-template-columns: 1fr;
-
-        max-width: 570px;
-
-    }
-
-
-    .brand-panel {
-
-        padding: 50px;
-
-    }
-
-
-    .shopping-decoration {
-
-        display: none;
-
-    }
-
-
-    .login-panel {
-
-        padding: 50px;
-
-    }
-
-}
-
-
-
-/* =====================================================
-   MOBILE
-   ===================================================== */
-
-@media (max-width: 600px) {
-
-    .login-navbar {
-
-        height: 65px;
-
-        padding: 0 20px;
-
-    }
-
-
-    .shopora-logo {
-
-        font-size: 22px;
-
-    }
-
-
-    .home-link {
-
-        font-size: 0;
-
-    }
-
-
-    .home-link::after {
-
-        content: "Home";
-
-        font-size: 12px;
-
-    }
-
-
-    .login-page {
-
-        padding:
-            15px 10px 25px;
-
-    }
-
-
-    .login-container {
-
-        border-radius: 15px;
-
-    }
-
-
-    .brand-panel {
-
-        padding:
-            40px 28px;
-
-    }
-
-
-    .welcome-badge {
-
-        font-size: 8px;
-
-        letter-spacing: 1.5px;
-
-    }
-
-
-    .large-logo-bag {
-
-        width: 60px;
-
-        height: 66px;
-
-    }
-
-
-    .large-logo-bag span {
-
-        font-size: 30px;
-
-    }
-
-
-    .brand-content h1 {
-
-        font-size: 36px;
-
-        letter-spacing: -1.5px;
-
-    }
-
-
-    .brand-description {
-
-        font-size: 13px;
-
-    }
-
-
-    .login-panel {
-
-        padding:
-            40px 25px;
-
-    }
-
-
-    .login-card h2 {
-
-        font-size: 28px;
-
-    }
-
-
-    .login-footer {
-
-        font-size: 9px;
-
-    }
-
-}
-
-
-
-/* =====================================================
-   SMALL PHONES
-   ===================================================== */
-
-@media (max-width: 380px) {
-
-    .brand-content h1 {
-
-        font-size: 31px;
-
-    }
-
-
-    .login-panel {
-
-        padding:
-            35px 18px;
-
-    }
-
+/* Responsive */
+@media (max-width: 960px) {
+  .auth-split-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-editorial-panel {
+    display: none;
+  }
+
+  .auth-form-panel {
+    padding: 32px 20px;
+    min-height: 100vh;
+  }
 }

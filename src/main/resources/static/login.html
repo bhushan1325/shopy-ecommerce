@@ -3,60 +3,140 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="SHOPY — Client Authentication. Access your orders, private curation, and streamlined checkout."/>
   <title>SHOPY — Client Sign In</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
   
-  <link rel="stylesheet" href="/shopy-brand.css"/>
-  <link rel="stylesheet" href="/style.css"/>
-  <link rel="stylesheet" href="/login.css"/>
+  <link rel="stylesheet" href="/shopy-brand.css?v=2026.4"/>
+  <link rel="stylesheet" href="/style.css?v=2026.4"/>
+  <link rel="stylesheet" href="/login.css?v=2026.4"/>
 </head>
-<body style="background-color: var(--paper);">
+<body class="auth-body">
 
-  <!-- Navbar -->
-  <header style="background: white; border-bottom: 1px solid var(--line); padding: 18px 36px; display: flex; justify-content: space-between; align-items: center;">
-    <a href="/" class="site-logo">SHOPY<span class="dot">.</span></a>
-    <a href="/" class="link-underline">← RETURN TO STORE</a>
-  </header>
-
-  <main style="min-height: calc(100vh - 140px); display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
-    <div style="background: white; border: 1px solid var(--line); border-top: 3px solid var(--wine); border-radius: 8px; width: 100%; max-width: 480px; padding: 44px; box-shadow: 0 16px 40px rgba(0,0,0,0.04);">
-      <p class="eyebrow-label" style="text-align: center; margin-bottom: 8px;">WELCOME BACK</p>
-      <h1 style="font-family: var(--serif); font-size: 34px; font-weight: 500; text-align: center; margin: 0 0 12px; letter-spacing: -1px;">
-        Sign in to your account.
-      </h1>
-      <p style="text-align: center; font-size: 13px; color: var(--muted); margin: 0 0 32px;">
-        Access your orders, saved pieces, and streamlined checkout.
-      </p>
-
-      <form id="loginForm" style="display: flex; flex-direction: column; gap: 20px;">
-        <div>
-          <label for="username" style="display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px;">Username</label>
-          <input type="text" id="username" name="username" required placeholder="Enter your username" autocomplete="username" style="width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 4px; padding: 0 14px; font-size: 14px; outline: none;"/>
-        </div>
-
-        <div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-            <label for="password" style="font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;">Password</label>
-          </div>
-          <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password" style="width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 4px; padding: 0 14px; font-size: 14px; outline: none;"/>
-        </div>
-
-        <button type="submit" id="loginSubmitBtn" class="btn-shopy-primary" style="height: 50px; margin-top: 10px; font-size: 12px; width: 100%;">
-          SIGN IN
-        </button>
-      </form>
-
-      <div style="text-align: center; margin-top: 28px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px;">
-        New to SHOPY? <a href="/register.html" style="color: var(--ink); font-weight: 700; text-decoration: underline;">Create an account</a>
+  <div class="auth-split-wrapper">
+    <!-- LEFT: High-Fashion Editorial Campaign Panel -->
+    <aside class="auth-editorial-panel" aria-label="Editorial Campaign Presentation">
+      <div class="editorial-crest">
+        <span class="crest-gold">✦</span>
+        <span>PRIVATE CLIENT SUITE · 2026</span>
       </div>
-    </div>
-  </main>
 
-  <script src="/shopy-core.js"></script>
-  <script src="/login.js"></script>
-  <script src="/shopy-ui.js"></script>
+      <div class="editorial-quote-block">
+        <h2 class="editorial-quote-title">
+          The art of<br/>
+          <em>dressing well</em><br/>
+          across generations.
+        </h2>
+        <p class="editorial-quote-desc">
+          Sign in to access your curated wardrobes, synchronized shopping bag, verified order tracking, and exclusive seasonal releases.
+        </p>
+      </div>
+
+      <div class="editorial-footer-tag">
+        <span>SHOPY COUTURE · MILAN EDIT</span>
+        <span>AUTUMN / WINTER</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Authentication Form Panel -->
+    <main class="auth-form-panel">
+      <!-- Top Navigation -->
+      <header class="auth-top-bar">
+        <a href="/" class="auth-brand-logo" aria-label="SHOPY Homepage">
+          SHOPY<span class="dot">.</span>
+        </a>
+        <a href="/" class="auth-back-link">← RETURN TO STORE</a>
+      </header>
+
+      <!-- Center Card -->
+      <section class="auth-card" aria-labelledby="loginHeading">
+        <span class="auth-eyebrow">CLIENT ACCESS</span>
+        <h1 id="loginHeading" class="auth-title">Welcome back.</h1>
+        <p class="auth-subtitle">
+          Enter your username and password to access your SHOPY account.
+        </p>
+
+        <!-- Pre-deployment Demo Access Bar -->
+        <div class="demo-access-box">
+          <span class="demo-access-label">✦ PRE-DEPLOYMENT TEST ACCOUNTS</span>
+          <div class="demo-pills">
+            <button type="button" class="demo-btn-pill" onclick="fillDemoCredentials('admin', 'Admin@12345')">
+              🔑 Admin Demo
+            </button>
+            <button type="button" class="demo-btn-pill" onclick="fillDemoCredentials('bhushan123', 'Bhushan@123')">
+              👤 Customer Demo
+            </button>
+          </div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <div class="input-wrapper">
+              <input type="text"
+                     id="username"
+                     name="username"
+                     class="form-input"
+                     required
+                     placeholder="Enter your username"
+                     autocomplete="username"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-wrapper">
+              <input type="password"
+                     id="password"
+                     name="password"
+                     class="form-input"
+                     required
+                     placeholder="Enter your password"
+                     autocomplete="current-password"/>
+              <button type="button"
+                      id="togglePasswordBtn"
+                      class="btn-toggle-pw"
+                      aria-label="Toggle password visibility">
+                <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="loginSubmitBtn" class="btn-auth-submit">
+            SIGN IN TO SHOPY →
+          </button>
+        </form>
+
+        <div class="auth-switch-box">
+          New to SHOPY?
+          <a href="/register.html" class="auth-switch-link">Create an account</a>
+        </div>
+      </section>
+
+      <!-- Bottom Reassurance -->
+      <footer class="auth-trust-footer">
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--shopy-green)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          256-Bit SSL Encrypted
+        </span>
+        <span>•</span>
+        <span>Complimentary Shipping Over ₹1,999</span>
+        <span>•</span>
+        <span>Official SHOPY Portal</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/shopy-core.js?v=2026.4"></script>
+  <script src="/login.js?v=2026.4"></script>
+  <script src="/shopy-ui.js?v=2026.4"></script>
 </body>
 </html>
