@@ -188,7 +188,7 @@ async function refreshDashboard() {
 
 async function loadProducts() {
     try {
-        const res = await fetch("/api/products?page=0&size=150&sortBy=id&direction=desc", {
+        const res = await fetch("/api/products?page=0&size=500&sortBy=id&direction=desc", {
             headers: getAuthHeaders()
         });
 

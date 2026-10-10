@@ -25,6 +25,7 @@ public class Product {
 
     private String brand;
 
+    @Column(length = 1000)
     private String imageUrl;
 
     private String ageGroup;

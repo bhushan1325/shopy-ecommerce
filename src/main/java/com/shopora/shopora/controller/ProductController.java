@@ -566,6 +566,7 @@ public class ProductController {
     }
 
 
+    @org.springframework.transaction.annotation.Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(
             @PathVariable Long id

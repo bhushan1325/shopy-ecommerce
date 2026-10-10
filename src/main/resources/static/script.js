@@ -158,7 +158,7 @@ async function loadCatalogProducts() {
 
   try {
     // 1. Fetch active products from backend
-    const response = await Shopy.apiFetch('/products/active?page=0&size=30');
+    const response = await Shopy.apiFetch('/products/active?page=0&size=500');
 
     if (!response.ok) {
       throw new Error(`Server returned HTTP ${response.status}`);
