@@ -41,16 +41,30 @@
       }
 
       // 2. Fetch Cart Total
+      const calcItemsTotal = (items) => {
+        if (!Array.isArray(items)) return 0;
+        return items.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+      };
+
       try {
         const totalRes = await Shopy.apiFetch('/cart/total');
         if (totalRes.ok) {
           const tData = await totalRes.json();
-          checkoutTotalAmount = Number(tData.total || 0);
+          const remoteTotal = Number(tData.total ?? tData.subtotal);
+          if (!isNaN(remoteTotal) && remoteTotal > 0) {
+            checkoutTotalAmount = remoteTotal;
+          } else {
+            checkoutTotalAmount = calcItemsTotal(checkoutItems);
+          }
         } else {
-          checkoutTotalAmount = checkoutItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+          checkoutTotalAmount = calcItemsTotal(checkoutItems);
         }
       } catch (e) {
-        checkoutTotalAmount = checkoutItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+        checkoutTotalAmount = calcItemsTotal(checkoutItems);
+      }
+
+      if (checkoutTotalAmount === 0 && checkoutItems.length > 0) {
+        checkoutTotalAmount = calcItemsTotal(checkoutItems);
       }
 
       const totalQty = checkoutItems.reduce((sum, it) => sum + Number(it.quantity || 0), 0);

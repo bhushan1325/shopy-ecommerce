@@ -1,11 +1,15 @@
 /* SHOPY Premium System — shared polish for secondary pages */
 :root{
-  --shopy-ink:#151515;
-  --shopy-muted:#737373;
-  --shopy-line:#e8e6e1;
-  --shopy-soft:#f7f6f2;
+  --shopy-ink:#111111;
+  --shopy-muted:#6E6B65;
+  --shopy-line:#E6E1D5;
+  --shopy-soft:#F0ECE1;
+  --shopy-paper:#F8F6F0;
   --shopy-card:#ffffff;
-  --shopy-accent:#151515;
+  --shopy-accent:#641F2B;
+  --shopy-wine:#641F2B;
+  --shopy-green:#13382C;
+  --shopy-gold:#C5A880;
   --shopy-radius:18px;
   --shopy-shadow:0 18px 50px rgba(20,20,20,.08);
   --shopy-fast:180ms cubic-bezier(.2,.7,.2,1);

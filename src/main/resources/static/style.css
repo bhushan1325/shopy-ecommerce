@@ -5,14 +5,21 @@
 
 /* Global Variables */
 :root {
-  --ink: #151515;
+  --ink: #111111;
   --white: #FFFFFF;
-  --paper: #F7F5F0;
-  --cream: #EFECE5;
-  --line: #E9E6DF;
-  --muted: #737373;
+  --paper: #F8F6F0;
+  --cream: #F0ECE1;
+  --line: #E6E1D5;
+  --muted: #6E6B65;
   --wine: #641F2B;
   --wine-hover: #7E2838;
+  --wine-subtle: rgba(100, 31, 43, 0.08);
+  --green: #13382C;
+  --green-hover: #1D4C3C;
+  --green-subtle: rgba(19, 56, 44, 0.08);
+  --gold: #C5A880;
+  --gold-bright: #D4AF37;
+  --gold-subtle: rgba(197, 168, 128, 0.15);
   --max-w: 1380px;
   --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -34,12 +41,12 @@ body {
 }
 
 /* --------------------------------------------------
-   A. ANNOUNCEMENT BAR
+   A. ANNOUNCEMENT BAR (Gucci Heritage Emerald & Gold)
    -------------------------------------------------- */
 .announcement-bar {
-  background-color: var(--ink);
-  color: var(--white);
-  height: 32px;
+  background-color: var(--green);
+  color: #F8F6F0;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,7 +61,7 @@ body {
 }
 
 .announcement-bar .dot-sep {
-  color: var(--wine);
+  color: var(--gold);
   font-size: 14px;
   line-height: 1;
 }
@@ -185,7 +192,7 @@ body {
   position: absolute;
   top: -2px;
   right: -3px;
-  background-color: var(--ink);
+  background-color: var(--wine);
   color: var(--white);
   font-size: 9px;
   font-weight: 700;
@@ -368,9 +375,9 @@ body {
 .eyebrow-label {
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 2px;
+  letter-spacing: 2.2px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--wine);
   margin-bottom: 20px;
 }
 
@@ -713,7 +720,7 @@ body {
 }
 
 .quick-add-btn:hover {
-  background-color: var(--ink);
+  background-color: var(--wine);
 }
 
 .card-details {
@@ -768,7 +775,7 @@ body {
 
 .card-rating {
   font-size: 11px;
-  color: #92702b;
+  color: var(--gold-bright);
   margin-top: 5px;
   display: flex;
   align-items: center;
@@ -818,10 +825,12 @@ body {
   justify-content: center;
   text-align: center;
   padding: 80px 24px;
+  border-top: 3px solid var(--wine);
+  border-bottom: 3px solid var(--green);
 }
 
 .brand-statement .eyebrow-label {
-  color: #888;
+  color: var(--gold);
 }
 
 .statement-heading {
@@ -848,6 +857,7 @@ body {
   grid-template-columns: repeat(4, 1fr);
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
+  background-color: var(--paper);
 }
 
 .benefit-item {
@@ -867,7 +877,19 @@ body {
   font-weight: 800;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  color: var(--ink);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.benefit-title::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--gold);
 }
 
 .benefit-desc {

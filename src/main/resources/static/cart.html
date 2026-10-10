@@ -84,40 +84,43 @@
       <!-- Right: Order Summary Card -->
       <aside class="summary-card" style="
         border: 1px solid var(--shopy-line);
+        border-top: 3px solid var(--shopy-wine);
         border-radius: 8px;
-        padding: 30px;
-        background: var(--paper);
+        padding: 32px 28px;
+        background: var(--shopy-paper);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
         position: sticky;
         top: 100px;
       ">
-        <p class="eyebrow-label" style="margin-bottom: 8px;">ORDER BREAKDOWN</p>
-        <h3 style="font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 24px; letter-spacing: -0.5px;">Summary</h3>
+        <p class="eyebrow-label" style="margin-bottom: 8px; color: var(--shopy-wine); font-size: 10px; font-weight: 800; letter-spacing: 2px;">ORDER BREAKDOWN</p>
+        <h3 style="font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 24px; letter-spacing: -0.5px; color: var(--shopy-ink);">Summary</h3>
 
-        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 14px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 20px;">
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--muted);">Pieces Selected</span>
-            <strong id="summaryItems">—</strong>
+        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 14px; margin-bottom: 24px; border-bottom: 1px solid var(--shopy-line); padding-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--shopy-muted);">Pieces Selected</span>
+            <strong id="summaryItems" style="color: var(--shopy-ink);">—</strong>
           </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--muted);">Standard Express Shipping</span>
-            <strong style="color: var(--wine);">FREE</strong>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--shopy-muted);">Standard Express Shipping</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px; background: var(--shopy-green-subtle); color: var(--shopy-green); font-size: 10px; font-weight: 800; letter-spacing: 1px; padding: 3px 8px; border-radius: 4px;">FREE</span>
           </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: var(--muted);">Taxes & Duties</span>
-            <span>Included</span>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--shopy-muted);">Taxes & Duties</span>
+            <span style="color: var(--shopy-muted); font-size: 13px;">Included</span>
           </div>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 28px;">
-          <span style="font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">Estimated Total</span>
-          <strong id="cartTotal" style="font-size: 24px; font-weight: 700; color: var(--ink);">Total: ₹0</strong>
+          <span style="font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--shopy-muted);">Estimated Total</span>
+          <strong id="cartTotal" style="font-size: 26px; font-weight: 700; color: var(--shopy-ink); font-feature-settings: 'tnum';">₹0</strong>
         </div>
 
-        <button class="btn-shopy-primary" onclick="goToCheckout()" style="width: 100%; height: 50px; font-size: 12px;" type="button">
-          PROCEED TO CHECKOUT
+        <button class="btn-shopy-primary" onclick="goToCheckout()" style="width: 100%; height: 52px; font-size: 11px; letter-spacing: 1.5px; font-weight: 800;" type="button">
+          PROCEED TO CHECKOUT →
         </button>
 
-        <p style="text-align: center; font-size: 11px; color: var(--muted); margin: 16px 0 0; line-height: 1.4;">
+        <p style="text-align: center; font-size: 11px; color: var(--shopy-muted); margin: 16px 0 0; line-height: 1.5; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--shopy-green);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           Secure 256-bit SSL encryption · Free returns across India
         </p>
       </aside>

@@ -18,4 +18,8 @@ public class CartTotalDTO {
     public void setSubtotal(Double subtotal) {
         this.subtotal = subtotal;
     }
+
+    public Double getTotal() {
+        return subtotal;
+    }
 }

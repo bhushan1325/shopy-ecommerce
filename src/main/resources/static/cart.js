@@ -49,16 +49,30 @@
       }
 
       // 2. Fetch real cart total from /api/cart/total
+      const calcItemsTotal = (items) => {
+        if (!Array.isArray(items)) return 0;
+        return items.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+      };
+
       try {
         const totalRes = await Shopy.apiFetch('/cart/total');
         if (totalRes.ok) {
           const totalData = await totalRes.json();
-          currentTotal = Number(totalData.total || 0);
+          const remoteTotal = Number(totalData.total ?? totalData.subtotal);
+          if (!isNaN(remoteTotal) && remoteTotal > 0) {
+            currentTotal = remoteTotal;
+          } else {
+            currentTotal = calcItemsTotal(currentCartItems);
+          }
         } else {
-          currentTotal = currentCartItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+          currentTotal = calcItemsTotal(currentCartItems);
         }
       } catch (err) {
-        currentTotal = currentCartItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+        currentTotal = calcItemsTotal(currentCartItems);
+      }
+
+      if (currentTotal === 0 && currentCartItems.length > 0) {
+        currentTotal = calcItemsTotal(currentCartItems);
       }
 
       // 3. Render items
@@ -135,35 +149,35 @@
 
             <!-- Details -->
             <div>
-              <p style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--muted);margin:0 0 4px;">SHOPY PIECE</p>
+              <p style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--shopy-wine);margin:0 0 4px;">SHOPY PIECE</p>
               <h3 style="margin:0 0 8px;font-size:16px;font-weight:600;">
-                <a href="/product.html?id=${item.productId}" style="color:var(--ink);">
+                <a href="/product.html?id=${item.productId}" style="color:var(--shopy-ink);">
                   ${Shopy.esc(item.productName)}
                 </a>
               </h3>
-              <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:var(--ink);">
+              <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:var(--shopy-ink);">
                 ${Shopy.formatPrice(item.price)}
-                <span style="font-size:12px;font-weight:400;color:var(--muted);"> each</span>
+                <span style="font-size:12px;font-weight:400;color:var(--shopy-muted);"> each</span>
               </p>
 
               <!-- Quantity Controls -->
-              <div style="display:flex;align-items:center;gap:12px;">
-                <div style="display:inline-flex;align-items:center;border:1px solid var(--shopy-line);border-radius:4px;">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <div style="display:inline-flex;align-items:center;border:1px solid var(--shopy-line);border-radius:4px;background:#fff;">
                   <button type="button"
                           class="btn-qty-minus"
                           data-item-id="${item.id}"
                           data-qty="${item.quantity}"
-                          style="width:32px;height:32px;background:none;border:none;cursor:pointer;font-weight:700;font-size:14px;">
+                          style="width:32px;height:32px;background:none;border:none;cursor:pointer;font-weight:700;font-size:14px;color:var(--shopy-ink);">
                     –
                   </button>
-                  <span style="min-width:32px;text-align:center;font-size:13px;font-weight:700;">
+                  <span style="min-width:32px;text-align:center;font-size:13px;font-weight:700;color:var(--shopy-ink);">
                     ${item.quantity}
                   </span>
                   <button type="button"
                           class="btn-qty-plus"
                           data-item-id="${item.id}"
                           data-qty="${item.quantity}"
-                          style="width:32px;height:32px;background:none;border:none;cursor:pointer;font-weight:700;font-size:14px;">
+                          style="width:32px;height:32px;background:none;border:none;cursor:pointer;font-weight:700;font-size:14px;color:var(--shopy-ink);">
                     +
                   </button>
                 </div>
@@ -171,7 +185,9 @@
                 <button type="button"
                         class="btn-remove-item"
                         data-item-id="${item.id}"
-                        style="background:none;border:none;color:var(--muted);font-size:12px;text-decoration:underline;cursor:pointer;padding:4px 8px;">
+                        style="background:none;border:none;color:var(--shopy-muted);font-size:12px;text-decoration:underline;cursor:pointer;padding:4px 8px;transition:color 150ms ease;"
+                        onmouseover="this.style.color='var(--shopy-wine)'"
+                        onmouseout="this.style.color='var(--shopy-muted)'">
                   Remove
                 </button>
               </div>
@@ -179,8 +195,8 @@
 
             <!-- Line Total -->
             <div style="text-align:right;">
-              <span style="font-size:11px;color:var(--muted);display:block;">SUBTOTAL</span>
-              <strong style="font-size:16px;color:var(--ink);">
+              <span style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--shopy-muted);display:block;margin-bottom:4px;">SUBTOTAL</span>
+              <strong style="font-size:17px;font-weight:700;color:var(--shopy-ink);">
                 ${Shopy.formatPrice(Number(item.price) * Number(item.quantity))}
               </strong>
             </div>
