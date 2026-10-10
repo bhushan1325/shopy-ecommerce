@@ -1,1313 +1,500 @@
-const API = "/api";
+/**
+ * SHOPY — Product Details Controller
+ * Accurate backend integration with /api/products, /api/variants, /api/reviews,
+ * size/color variant selection, dynamic pricing, and reliable add-to-bag dispatch.
+ */
 
-const params = new URLSearchParams(location.search);
-const id = params.get("id");
+(function () {
+  'use strict';
 
-let product = null;
-let variants = [];
-let selectedSize = null;
-let selectedColor = null;
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get('id');
 
-const $ = selector => document.querySelector(selector);
+  let currentProduct = null;
+  let productVariants = [];
+  let selectedSizeVariant = null;
+  let selectedColor = null;
 
-const money = value =>
-  "₹" + Number(value || 0).toLocaleString("en-IN");
+  const $ = selector => document.querySelector(selector);
 
-function token() {
-  return (
-    localStorage.getItem("token") ||
-    sessionStorage.getItem("token") ||
-    ""
-  );
-}
-
-function toast(message) {
-  const element = $("#toast");
-
-  if (!element) return;
-
-  element.textContent = message;
-  element.classList.add("show");
-
-  clearTimeout(window.__shopyToast);
-
-  window.__shopyToast = setTimeout(() => {
-    element.classList.remove("show");
-  }, 2200);
-}
-
-function imgFallback(product) {
-  return (
-    product.imageUrl ||
-    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=85"
-  );
-}
-
-
-/* =========================
-   PAGE START
-========================= */
-
-document.addEventListener("DOMContentLoaded", () => {
-  setupHeader();
-  setupSizeGuide();
-  setupProductActions();
-  load();
-});
-
-
-/* =========================
-   HEADER
-========================= */
-
-function setupHeader() {
-
-  const header =
-    document.querySelector(".site-header");
-
-  const menu = $("#menuBtn");
-  const mobile = $("#mobileNav");
-
-  const search = $("#searchBtn");
-  const panel = $("#searchPanel");
-
-  const scroll = () => {
-
-    header?.classList.toggle(
-      "scrolled",
-      window.scrollY > 8
-    );
-
-  };
-
-  scroll();
-
-  window.addEventListener(
-    "scroll",
-    scroll,
-    { passive:true }
-  );
-
-  menu?.addEventListener(
-    "click",
-    () => {
-      const isOpen = mobile?.classList.toggle("open");
-      menu.setAttribute("aria-expanded", String(Boolean(isOpen)));
-    }
-  );
-
-  search?.addEventListener(
-    "click",
-    () => {
-      const isOpen = panel?.classList.toggle("open");
-      search.setAttribute("aria-expanded", String(Boolean(isOpen)));
-      if (isOpen) {
-        setTimeout(() => $("#searchInput")?.focus(), 50);
-      }
-    }
-  );
-
-  $("#searchForm")?.addEventListener("submit", event => {
-    event.preventDefault();
-    goSearch();
+  document.addEventListener('DOMContentLoaded', () => {
+    initSizeGuideModal();
+    initHeaderControls();
+    loadProductDetails();
   });
 
-  document
-    .querySelectorAll("[data-q]")
-    .forEach(button => {
+  /* ==========================================================================
+     1. HEADER INTERACTIONS
+     ========================================================================== */
+  function initHeaderControls() {
+    const searchBtn = $('#searchBtn');
+    const searchBox = $('#searchBox');
+    const searchForm = $('#searchForm');
+    const searchInput = $('#searchInput');
+    const menuBtn = $('#menuBtn');
+    const mobileNav = $('#mobileNav');
 
-      button.addEventListener(
-        "click",
-        () => {
-
-          location.href =
-            "/?search=" +
-            encodeURIComponent(
-              button.dataset.q
-            );
-
+    if (searchBtn && searchBox) {
+      searchBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = searchBox.classList.toggle('open');
+        if (isOpen && searchInput) setTimeout(() => searchInput.focus(), 100);
+      });
+      document.addEventListener('click', (e) => {
+        if (!searchBox.contains(e.target) && !searchBtn.contains(e.target)) {
+          searchBox.classList.remove('open');
         }
-      );
-
-    });
-
-  $("#galleryWish")?.addEventListener(
-    "click",
-    () => {
-      $("#wish")?.click();
+      });
     }
-  );
-}
 
-function goSearch() {
+    if (searchForm) {
+      searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const q = searchInput ? searchInput.value.trim() : '';
+        if (q) window.location.href = `/?search=${encodeURIComponent(q)}`;
+      });
+    }
 
-  const input =
-    $("#searchInput");
-
-  if (!input) return;
-
-  const query =
-    input.value.trim();
-
-  if (query) {
-
-    location.href =
-      "/?search=" +
-      encodeURIComponent(query);
-
+    if (menuBtn && mobileNav) {
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        mobileNav.classList.toggle('open');
+      });
+      document.addEventListener('click', (e) => {
+        if (!mobileNav.contains(e.target) && !menuBtn.contains(e.target)) {
+          mobileNav.classList.remove('open');
+        }
+      });
+    }
   }
 
-}
+  /* ==========================================================================
+     2. LOAD PRODUCT FROM BACKEND
+     ========================================================================== */
+  async function loadProductDetails() {
+    const stateEl = $('#productState');
+    const viewEl = $('#productView');
 
-
-/* =========================
-   SIZE GUIDE
-   FIXED
-========================= */
-
-function setupSizeGuide() {
-
-  const modal =
-    document.getElementById(
-      "sizeModal"
-    );
-
-  if (!modal) {
-
-    console.error(
-      "SHOPY: sizeModal not found"
-    );
-
-    return;
-  }
-
-
-  function openGuide(event) {
-
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    modal.classList.remove(
-      "hidden"
-    );
-
-    modal.setAttribute(
-      "aria-hidden",
-      "false"
-    );
-
-    document.body.style.overflow =
-      "hidden";
-
-  }
-
-
-  function closeGuide(event) {
-
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    modal.classList.add(
-      "hidden"
-    );
-
-    modal.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-    document.body.style.overflow =
-      "";
-
-  }
-
-
-  /*
-     OPEN SIZE GUIDE
-  */
-
-  document.addEventListener(
-    "click",
-    event => {
-
-      const target =
-        event.target;
-
-
-      if (
-        target.closest(
-          "#sizeGuide"
-        )
-      ) {
-
-        openGuide(event);
-
-        return;
+    if (!productId) {
+      if (stateEl) {
+        stateEl.innerHTML = `
+          <div style="padding: 60px 0;">
+            <p style="font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--muted);">NOTICE</p>
+            <h2 style="font-family:var(--serif);font-size:28px;">No product specified.</h2>
+            <a href="/" class="btn-shopy-primary" style="margin-top:20px;">EXPLORE CATALOG</a>
+          </div>
+        `;
       }
-
-
-      /*
-         CLOSE X
-      */
-
-      if (
-        target.closest(
-          "#closeModal"
-        )
-      ) {
-
-        closeGuide(event);
-
-        return;
-      }
-
-
-      /*
-         CLOSE CANCEL
-      */
-
-      if (
-        target.closest(
-          "#cancelSizeGuide"
-        )
-      ) {
-
-        closeGuide(event);
-
-        return;
-      }
-
-
-      /*
-         CLICK OUTSIDE MODAL CARD
-      */
-
-      if (
-        target === modal
-      ) {
-
-        closeGuide(event);
-
-        return;
-      }
-
+      return;
     }
-  );
-
-
-  /*
-     ESCAPE KEY
-  */
-
-  document.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key === "Escape" &&
-        !modal.classList.contains(
-          "hidden"
-        )
-      ) {
-
-        closeGuide(event);
-
-      }
-
-    }
-  );
-
-
-  /*
-     Stop clicks inside the white
-     modal card.
-  */
-
-  const card =
-    modal.querySelector(
-      ".modal-card"
-    );
-
-  if (card) {
-
-    card.addEventListener(
-      "click",
-      event => {
-        event.stopPropagation();
-      }
-    );
-
-  }
-
-}
-
-
-/* =========================
-   PRODUCT ACTIONS
-========================= */
-
-function setupProductActions() {
-
-  $("#addBag")?.addEventListener(
-    "click",
-    () => {
-      addToBag(false);
-    }
-  );
-
-  $("#buyNow")?.addEventListener(
-    "click",
-    () => {
-      addToBag(true);
-    }
-  );
-
-  $("#wish")?.addEventListener(
-    "click",
-    addWishlist
-  );
-
-}
-
-
-/* =========================
-   LOAD PRODUCT
-========================= */
-
-async function load() {
-
-  if (!id) {
-
-    showError(
-      "No product selected."
-    );
-
-    return;
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        `${API}/products/${id}`
-      );
-
-
-    if (!response.ok) {
-
-      throw new Error(
-        "Product not found"
-      );
-
-    }
-
-
-    product =
-      await response.json();
-
 
     try {
+      // 1. Fetch Product
+      const productRes = await Shopy.apiFetch(`/products/${productId}`);
+      if (!productRes.ok) {
+        throw new Error('Product not found or unavailable');
+      }
+      currentProduct = await productRes.json();
 
-      const variantResponse =
-        await fetch(
-          `${API}/product-variants/product/${id}`
-        );
-
-
-      if (variantResponse.ok) {
-
-        variants =
-          await variantResponse.json();
-
+      // 2. Fetch Product Variants (correct endpoint: /api/variants/product/{id})
+      try {
+        const variantRes = await Shopy.apiFetch(`/variants/product/${productId}`);
+        if (variantRes.ok) {
+          productVariants = await variantRes.json();
+        } else {
+          productVariants = [];
+        }
+      } catch (err) {
+        console.warn('Variants could not be fetched:', err);
+        productVariants = [];
       }
 
-    } catch {
+      // 3. Fetch Reviews
+      let reviews = [];
+      try {
+        const revRes = await Shopy.apiFetch(`/reviews/product/${productId}`);
+        if (revRes.ok) {
+          reviews = await revRes.json();
+        }
+      } catch (err) {
+        reviews = [];
+      }
 
-      variants = [];
+      // 4. Render Details
+      renderProduct(currentProduct, productVariants, reviews);
 
+      if (stateEl) stateEl.classList.add('hidden');
+      if (viewEl) viewEl.classList.remove('hidden');
+
+    } catch (error) {
+      console.error('Failed to load product:', error);
+      if (stateEl) {
+        stateEl.innerHTML = `
+          <div style="padding: 60px 0;">
+            <p style="font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--muted);">UNAVAILABLE</p>
+            <h2 style="font-family:var(--serif);font-size:28px;">This piece could not be retrieved.</h2>
+            <p style="color:var(--muted);margin-bottom:24px;">It may have been removed or is temporarily out of stock.</p>
+            <a href="/" class="btn-shopy-primary">RETURN TO CATALOG</a>
+          </div>
+        `;
+      }
+    }
+  }
+
+  /* ==========================================================================
+     3. RENDER PRODUCT DETAILS & VARIANTS
+     ========================================================================== */
+  function renderProduct(p, variants, reviews) {
+    // Breadcrumbs
+    if ($('#crumbName')) $('#crumbName').textContent = p.name;
+    if ($('#crumbCategory')) {
+      const catName = p.category ? p.category.name : (p.ageGroup || 'Catalog');
+      $('#crumbCategory').textContent = catName;
     }
 
-
-    render();
-
-    updateHeaderCounts();
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    showError(
-      "We couldn't load this product."
-    );
-
-  }
-
-}
-
-
-/* =========================
-   ERROR
-========================= */
-
-function showError(message) {
-
-  const state =
-    $("#productState");
-
-  if (!state) return;
-
-  state.textContent =
-    message;
-
-  state.classList.remove(
-    "hidden"
-  );
-
-}
-
-
-/* =========================
-   RENDER PRODUCT
-========================= */
-
-function render() {
-
-  $("#productState")
-    ?.classList.add("hidden");
-
-
-  $("#productView")
-    ?.classList.remove("hidden");
-
-
-  $("#crumbName").textContent =
-    product.name ||
-    "Product";
-
-
-  $("#brand").textContent =
-    product.brand ||
-    "SHOPY";
-
-
-  $("#name").textContent =
-    product.name ||
-    "";
-
-
-  $("#description").textContent =
-    product.description ||
-    "Designed for modern everyday style.";
-
-
-  $("#material").textContent =
-    product.material ||
-    "Premium fabric";
-
-
-  $("#fit").textContent =
-    product.fit ||
-    "Regular";
-
-
-  $("#style").textContent =
-    product.style ||
-    product.subcategory ||
-    "Everyday";
-
-
-  $("#availability").textContent =
-    Number(product.stock || 0) > 0
-      ? "In stock"
-      : "Sold out";
-
-
-  $("#rating").textContent =
-    product.rating
-      ? `★ ${Number(product.rating).toFixed(1)}`
-      : "New";
-
-
-  $("#reviews").textContent =
-    `${product.reviewCount || 0} reviews`;
-
-
-  $("#salePrice").textContent =
-    money(
-      product.salePrice ||
-      product.price
-    );
-
-
-  $("#price").textContent =
-    product.salePrice &&
-    product.salePrice <
-      product.price
-      ? money(product.price)
-      : "";
-
-
-  if (
-    product.salePrice &&
-    product.price &&
-    product.salePrice <
-      product.price
-  ) {
-
-    $("#discount").textContent =
-      Math.round(
-        (
-          1 -
-          product.salePrice /
-          product.price
-        ) * 100
-      ) + "% OFF";
-
-  } else {
-
-    $("#discount").textContent =
-      "";
-
-  }
-
-
-  if (product.badge) {
-
-    $("#badge").textContent =
-      product.badge;
-
-    $("#badge").classList.remove(
-      "hidden"
-    );
-
-  }
-
-
-  const image =
-    $("#mainImage");
-
-
-  if (image) {
-
-    image.src =
-      imgFallback(product);
-
-    image.alt =
-      product.name ||
-      "SHOPY product";
-
-
-    image.onerror =
-      () => {
-
-        image.src =
-          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=85";
-
-      };
-
-  }
-
-
-  renderGallery();
-
-  renderOptions();
-
-
-  $("#care").textContent =
-    product.careInstructions ||
-    "Follow the care label. Wash and store according to the garment instructions.";
-
-
-  if (
-    Number(product.stock || 0) <= 0
-  ) {
-
-    const addButton =
-      $("#addBag");
-
-    const buyButton =
-      $("#buyNow");
-
-
-    if (addButton) {
-
-      addButton.disabled =
-        true;
-
-      addButton.textContent =
-        "SOLD OUT";
-
+    // Details
+    if ($('#brand')) $('#brand').textContent = p.brand || 'SHOPY EDIT';
+    if ($('#name')) $('#name').textContent = p.name;
+    if ($('#description')) $('#description').textContent = p.description || 'Premium wardrobe essential crafted with exquisite attention to silhouette and durability.';
+
+    // Specifications
+    if ($('#material')) $('#material').textContent = p.material || 'Premium Natural Fiber';
+    if ($('#fit')) $('#fit').textContent = p.style || 'Regular Contemporary';
+    if ($('#style')) $('#style').textContent = p.subcategory || 'Signature';
+
+    const stock = Number(p.stock || 0);
+    if ($('#availability')) {
+      $('#availability').textContent = stock > 0 ? `In Stock (${stock} units)` : 'Sold Out';
+      if (stock <= 0) $('#availability').style.color = 'var(--wine)';
     }
 
+    // Pricing
+    updatePriceDisplay(p, null);
 
-    if (buyButton) {
-
-      buyButton.disabled =
-        true;
-
+    // Rating
+    if ($('#rating')) {
+      const ratingVal = p.rating || 0;
+      $('#rating').textContent = ratingVal > 0 ? `★ ${Number(ratingVal).toFixed(1)}` : '';
+    }
+    if ($('#reviews')) {
+      const reviewCount = Array.isArray(reviews) ? reviews.length : (p.reviewCount || 0);
+      $('#reviews').textContent = reviewCount > 0 ? `(${reviewCount} client reviews)` : '';
     }
 
+    // Gallery
+    renderGallery(p);
+
+    // Variants (Sizes & Colors)
+    renderVariants(variants);
+
+    // Wishlist Button state
+    initWishlistButton(p.id);
+
+    // Order Action Buttons
+    initActionButtons(p);
   }
 
-}
+  function updatePriceDisplay(product, variant) {
+    const isSale = product.salePrice && product.salePrice < product.price;
+    const basePrice = isSale ? product.salePrice : product.price;
+    const extraPrice = variant && variant.additionalPrice ? Number(variant.additionalPrice) : 0;
+    const finalPrice = basePrice + extraPrice;
 
+    if ($('#salePrice')) {
+      $('#salePrice').textContent = Shopy.formatPrice(finalPrice);
+    }
 
-/* =========================
-   GALLERY
-========================= */
-
-function renderGallery() {
-  const main = $("#mainImage");
-  const thumbs = $("#thumbs");
-  if (!main || !thumbs) return;
-
-  const candidates = [
-    product.imageUrl,
-    product.imageUrl2,
-    product.imageUrl3,
-    product.image2,
-    product.image3
-  ].filter(Boolean);
-
-  const images = [...new Set(candidates)];
-  thumbs.innerHTML = "";
-
-  if (!images.length) {
-    return;
+    if (isSale && $('#price')) {
+      $('#price').textContent = Shopy.formatPrice(product.price + extraPrice);
+      $('#price').style.display = 'inline';
+      if ($('#discount')) {
+        const discountPct = Math.round(((product.price - product.salePrice) / product.price) * 100);
+        $('#discount').textContent = `${discountPct}% OFF`;
+        $('#discount').style.display = 'inline-block';
+      }
+    } else {
+      if ($('#price')) $('#price').style.display = 'none';
+      if ($('#discount')) $('#discount').style.display = 'none';
+    }
   }
 
-  images.forEach((src, index) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "thumb-button";
-    button.setAttribute("aria-label", `View product image ${index + 1}`);
+  function renderGallery(p) {
+    const mainImg = $('#mainImage');
+    const thumbsContainer = $('#thumbs');
+    const badgeEl = $('#badge');
 
-    const image = document.createElement("img");
-    image.className = "thumb";
-    image.src = src;
-    image.alt = `${product.name || "Product"} view ${index + 1}`;
-    image.loading = index === 0 ? "eager" : "lazy";
+    const fallbackImg = 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=85';
+    const primaryImg = p.imageUrl || fallbackImg;
 
-    if (index === 0) image.classList.add("active");
+    if (mainImg) {
+      mainImg.src = primaryImg;
+      mainImg.alt = p.name;
+    }
 
-    button.appendChild(image);
-    button.addEventListener("click", () => {
-      main.src = src;
-      thumbs.querySelectorAll(".thumb").forEach(item => item.classList.remove("active"));
-      image.classList.add("active");
+    if (badgeEl) {
+      if (p.salePrice && p.salePrice < p.price) {
+        badgeEl.textContent = 'Sale';
+        badgeEl.className = 'badge card-badge sale';
+        badgeEl.classList.remove('hidden');
+      } else if (p.badge) {
+        badgeEl.textContent = p.badge;
+        badgeEl.className = 'badge card-badge';
+        badgeEl.classList.remove('hidden');
+      } else {
+        badgeEl.classList.add('hidden');
+      }
+    }
+
+    if (thumbsContainer) {
+      thumbsContainer.innerHTML = '';
+      const imageList = [primaryImg];
+
+      // Provide alternate perspective mock images if only one exists
+      if (imageList.length === 1) {
+        imageList.push(primaryImg);
+      }
+
+      imageList.forEach((url, idx) => {
+        const thumbBtn = document.createElement('button');
+        thumbBtn.type = 'button';
+        thumbBtn.className = `thumb-btn ${idx === 0 ? 'active' : ''}`;
+        thumbBtn.style.cssText = 'border: 1px solid var(--line); border-radius: 4px; overflow: hidden; width: 64px; height: 80px; padding: 0; cursor: pointer; background: #fff;';
+        thumbBtn.innerHTML = `<img src="${Shopy.esc(url)}" alt="" style="width:100%;height:100%;object-fit:cover;"/>`;
+        thumbBtn.addEventListener('click', () => {
+          if (mainImg) mainImg.src = url;
+          thumbsContainer.querySelectorAll('.thumb-btn').forEach(btn => btn.style.borderColor = 'var(--line)');
+          thumbBtn.style.borderColor = 'var(--ink)';
+        });
+        thumbsContainer.appendChild(thumbBtn);
+      });
+    }
+  }
+
+  function renderVariants(variants) {
+    const sizeContainer = $('#sizes');
+    const colorContainer = $('#colors');
+
+    // 1. Size variants
+    const sizeVariants = variants.filter(v => (v.variantName || '').toLowerCase() === 'size');
+
+    if (sizeContainer) {
+      sizeContainer.innerHTML = '';
+
+      if (sizeVariants.length > 0) {
+        sizeVariants.forEach(variant => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-size';
+          btn.textContent = variant.value;
+          btn.style.cssText = `
+            min-width: 44px;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            background: var(--white);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 160ms ease;
+          `;
+
+          const stock = Number(variant.stock !== undefined ? variant.stock : 10);
+          if (stock <= 0) {
+            btn.disabled = true;
+            btn.style.opacity = '0.4';
+            btn.style.cursor = 'not-allowed';
+            btn.title = 'Size out of stock';
+          }
+
+          btn.addEventListener('click', () => {
+            selectedSizeVariant = variant;
+            sizeContainer.querySelectorAll('.btn-size').forEach(b => {
+              b.style.borderColor = 'var(--line)';
+              b.style.background = 'var(--white)';
+              b.style.color = 'var(--ink)';
+            });
+            btn.style.borderColor = 'var(--ink)';
+            btn.style.background = 'var(--ink)';
+            btn.style.color = 'var(--white)';
+
+            // Update price in case variant has additionalPrice
+            updatePriceDisplay(currentProduct, variant);
+          });
+
+          sizeContainer.appendChild(btn);
+        });
+
+        // Auto-select first in-stock variant by default
+        const firstAvailable = sizeContainer.querySelector('.btn-size:not([disabled])');
+        if (firstAvailable) {
+          firstAvailable.click();
+        }
+      } else {
+        sizeContainer.innerHTML = '<span style="font-size:13px;color:var(--muted);padding:8px 0;">Standard Sizing (One Size)</span>';
+        selectedSizeVariant = null;
+      }
+    }
+
+    // 2. Color variants
+    const colorVariants = variants.filter(v => (v.variantName || '').toLowerCase() === 'color');
+
+    if (colorContainer) {
+      colorContainer.innerHTML = '';
+
+      if (colorVariants.length > 0) {
+        colorVariants.forEach(variant => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-color';
+          btn.textContent = variant.value;
+          btn.style.cssText = `
+            padding: 8px 16px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: var(--white);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 160ms ease;
+          `;
+
+          btn.addEventListener('click', () => {
+            selectedColor = variant.value;
+            if ($('#selectedColor')) $('#selectedColor').textContent = variant.value;
+            colorContainer.querySelectorAll('.btn-color').forEach(b => {
+              b.style.borderColor = 'var(--line)';
+              b.style.background = 'var(--white)';
+              b.style.color = 'var(--ink)';
+            });
+            btn.style.borderColor = 'var(--ink)';
+            btn.style.background = 'var(--ink)';
+            btn.style.color = 'var(--white)';
+          });
+
+          colorContainer.appendChild(btn);
+        });
+
+        // Auto-select first color
+        const firstColor = colorContainer.querySelector('.btn-color');
+        if (firstColor) firstColor.click();
+      } else {
+        if ($('#selectedColor')) $('#selectedColor').textContent = 'Original Edit';
+      }
+    }
+  }
+
+  /* ==========================================================================
+     4. WISHLIST INTEGRATION
+     ========================================================================== */
+  async function initWishlistButton(pId) {
+    const wishBtn = $('#wish');
+    const galleryWishBtn = $('#galleryWish');
+
+    if (Shopy.isLoggedIn()) {
+      try {
+        const wishRes = await Shopy.apiFetch('/wishlist');
+        if (wishRes.ok) {
+          const items = await wishRes.json();
+          const isWishlisted = Array.isArray(items) && items.some(item => {
+            const id = item.product ? item.product.id : item.productId;
+            return Number(id) === Number(pId);
+          });
+
+          if (isWishlisted) {
+            if (wishBtn) { wishBtn.innerHTML = '♥'; wishBtn.style.color = 'var(--wine)'; }
+            if (galleryWishBtn) { galleryWishBtn.classList.add('active'); galleryWishBtn.style.color = 'var(--wine)'; }
+          }
+        }
+      } catch (e) {}
+    }
+
+    const handleWishClick = async (e) => {
+      e.preventDefault();
+      const success = await Shopy.toggleWishlist(pId, wishBtn);
+      if (success) {
+        const active = wishBtn.innerHTML === '♥';
+        if (galleryWishBtn) {
+          galleryWishBtn.style.color = active ? 'var(--wine)' : '';
+        }
+      }
+    };
+
+    if (wishBtn) wishBtn.addEventListener('click', handleWishClick);
+    if (galleryWishBtn) galleryWishBtn.addEventListener('click', handleWishClick);
+  }
+
+  /* ==========================================================================
+     5. ADD TO BAG & BUY NOW ACTIONS
+     ========================================================================== */
+  function initActionButtons(product) {
+    const addBagBtn = $('#addBag');
+    const buyNowBtn = $('#buyNow');
+
+    const handleAddToCart = async (isBuyNow = false) => {
+      const variantId = selectedSizeVariant ? selectedSizeVariant.id : null;
+
+      // Disable button during execution
+      if (addBagBtn) addBagBtn.disabled = true;
+      if (buyNowBtn) buyNowBtn.disabled = true;
+
+      const success = await Shopy.addToCart(product.id, 1, variantId);
+
+      if (addBagBtn) addBagBtn.disabled = false;
+      if (buyNowBtn) buyNowBtn.disabled = false;
+
+      if (success && isBuyNow) {
+        window.location.href = '/cart.html';
+      }
+    };
+
+    if (addBagBtn) {
+      addBagBtn.addEventListener('click', () => handleAddToCart(false));
+    }
+
+    if (buyNowBtn) {
+      buyNowBtn.addEventListener('click', () => handleAddToCart(true));
+    }
+  }
+
+  /* ==========================================================================
+     6. SIZE GUIDE MODAL CONTROLS
+     ========================================================================== */
+  function initSizeGuideModal() {
+    const guideBtn = $('#sizeGuide');
+    const modal = $('#sizeModal');
+    const closeBtn = $('#closeModal');
+    const cancelBtn = $('#cancelSizeGuide');
+
+    const openModal = () => {
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+    };
+
+    const closeModal = () => {
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+    };
+
+    if (guideBtn) guideBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
     });
-    thumbs.appendChild(button);
-  });
-}
-
-
-/* =========================
-   SIZE + COLOR OPTIONS
-========================= */
-
-function renderOptions() {
-
-  const sizes =
-    variants.filter(
-      variant =>
-        (variant.variantName || "")
-          .toLowerCase() ===
-        "size"
-    );
-
-
-  const colors =
-    variants.filter(
-      variant =>
-        (variant.variantName || "")
-          .toLowerCase() ===
-        "color"
-    );
-
-
-  const unique =
-    array => [
-
-      ...new Map(
-        array.map(item => [
-          item.value,
-          item
-        ])
-      ).values()
-
-    ];
-
-
-  const sizesContainer =
-    $("#sizes");
-
-
-  if (sizesContainer) {
-
-    sizesContainer.innerHTML =
-      "";
-
-
-    unique(sizes)
-      .forEach(
-        variant => {
-
-          const button =
-            document.createElement(
-              "button"
-            );
-
-
-          button.type =
-            "button";
-
-          button.className =
-            "size-btn";
-
-          button.textContent =
-            variant.value;
-
-
-          button.disabled =
-            Number(
-              variant.stock || 0
-            ) <= 0;
-
-
-          button.addEventListener(
-            "click",
-            () => {
-
-              selectedSize =
-                variant.value;
-
-
-              document
-                .querySelectorAll(
-                  ".size-btn"
-                )
-                .forEach(
-                  item =>
-                    item.classList
-                      .remove(
-                        "selected"
-                      )
-                );
-
-
-              button.classList.add(
-                "selected"
-              );
-
-            }
-          );
-
-
-          sizesContainer
-            .appendChild(
-              button
-            );
-
-        }
-      );
-
-
-    if (!sizes.length) {
-
-      sizesContainer.innerHTML =
-        '<span style="font-size:13px;color:#777">One size</span>';
-
-    }
-
   }
 
-
-  const colorsContainer =
-    $("#colors");
-
-
-  if (colorsContainer) {
-
-    colorsContainer.innerHTML =
-      "";
-
-
-    unique(colors)
-      .forEach(
-        variant => {
-
-          const button =
-            document.createElement(
-              "button"
-            );
-
-
-          button.type =
-            "button";
-
-          button.className =
-            "color-btn";
-
-
-          button.title =
-            variant.value;
-
-
-          button.setAttribute(
-            "aria-label",
-            variant.value
-          );
-
-
-          button.style.background =
-            colorMap(
-              variant.value
-            );
-
-
-          button.addEventListener(
-            "click",
-            () => {
-
-              selectedColor =
-                variant.value;
-
-
-              document
-                .querySelectorAll(
-                  ".color-btn"
-                )
-                .forEach(
-                  item =>
-                    item.classList
-                      .remove(
-                        "selected"
-                      )
-                );
-
-
-              button.classList.add(
-                "selected"
-              );
-
-
-              const selected =
-                $("#selectedColor");
-
-
-              if (selected) {
-
-                selected.textContent =
-                  variant.value;
-
-              }
-
-            }
-          );
-
-
-          colorsContainer
-            .appendChild(
-              button
-            );
-
-        }
-      );
-
-
-    if (!colors.length) {
-
-      $("#selectedColor")
-        .textContent = "—";
-
-    }
-
-  }
-
-}
-
-
-/* =========================
-   COLOR MAP
-========================= */
-
-function colorMap(value) {
-
-  const color =
-    (value || "")
-      .toLowerCase();
-
-
-  const colors = {
-
-    black:"#111",
-    white:"#fff",
-    navy:"#26334b",
-    blue:"#4169a1",
-    beige:"#d8c5a6",
-    brown:"#795548",
-    pink:"#e6a1b1",
-    green:"#5f765e",
-    grey:"#aaa",
-    gray:"#aaa",
-    cream:"#eee2c8",
-    gold:"#c9a227",
-    tan:"#b98252",
-    khaki:"#9c956b",
-
-    floral:
-      "linear-gradient(135deg,#f6c1c1,#d5e3bc,#c2d5ed)",
-
-    indigo:"#43517c"
-
-  };
-
-
-  return (
-    colors[color] ||
-    "#ddd"
-  );
-
-}
-
-
-/* =========================
-   ADD TO BAG
-========================= */
-
-async function addToBag(
-  buyNow = false
-) {
-
-  const currentToken =
-    token();
-
-
-  if (!currentToken) {
-
-    toast(
-      "Please login first"
-    );
-
-
-    setTimeout(
-      () => {
-        location.href =
-          "/login.html";
-      },
-      700
-    );
-
-
-    return;
-  }
-
-
-  const body = {
-
-    productId:
-      Number(id),
-
-    quantity:
-      1
-
-  };
-
-
-  if (selectedSize) {
-
-    body.size =
-      selectedSize;
-
-  }
-
-
-  if (selectedColor) {
-
-    body.color =
-      selectedColor;
-
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        `${API}/cart/add`,
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${currentToken}`
-          },
-
-          body:
-            JSON.stringify(body)
-        }
-      );
-
-
-    if (!response.ok) {
-
-      throw new Error();
-
-    }
-
-
-    toast(
-      "Added to bag"
-    );
-
-
-    updateHeaderCounts();
-
-
-    if (buyNow) {
-
-      setTimeout(
-        () => {
-
-          location.href =
-            "/cart.html";
-
-        },
-        500
-      );
-
-    }
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    toast(
-      "Could not add this item"
-    );
-
-  }
-
-}
-
-
-/* =========================
-   WISHLIST
-========================= */
-
-async function addWishlist() {
-
-  const currentToken =
-    token();
-
-
-  if (!currentToken) {
-
-    toast(
-      "Please login first"
-    );
-
-
-    setTimeout(
-      () => {
-
-        location.href =
-          "/login.html";
-
-      },
-      700
-    );
-
-
-    return;
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        `${API}/wishlist/${id}`,
-        {
-          method:"POST",
-
-          headers:{
-            Authorization:
-              `Bearer ${currentToken}`
-          }
-        }
-      );
-
-
-    if (!response.ok) {
-
-      throw new Error();
-
-    }
-
-
-    const wishButton =
-      $("#wish");
-
-
-    const galleryButton =
-      $("#galleryWish");
-
-
-    if (wishButton) {
-
-      wishButton.textContent =
-        "♥";
-
-    }
-
-
-    if (galleryButton) {
-
-      galleryButton.textContent =
-        "♥";
-
-    }
-
-
-    toast(
-      "Added to wishlist"
-    );
-
-
-    updateHeaderCounts();
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    toast(
-      "Could not update wishlist"
-    );
-
-  }
-
-}
-
-
-/* =========================
-   HEADER COUNTS
-========================= */
-
-async function updateHeaderCounts() {
-
-  const currentToken =
-    token();
-
-
-  if (!currentToken)
-    return;
-
-
-  if ($("#account")) {
-
-    $("#account").href =
-      "/profile.html";
-
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        `${API}/cart`,
-        {
-          headers:{
-            Authorization:
-              `Bearer ${currentToken}`
-          }
-        }
-      );
-
-
-    const data =
-      response.ok
-        ? await response.json()
-        : {};
-
-
-    const count =
-      (data.items || [])
-        .reduce(
-          (total,item) =>
-            total +
-            Number(
-              item.quantity || 0
-            ),
-          0
-        );
-
-
-    if ($("#cartCount")) {
-
-      $("#cartCount").textContent =
-        count;
-
-    }
-
-
-  } catch (error) {
-
-    console.error(error);
-
-  }
-
-
-  try {
-
-    const response =
-      await fetch(
-        `${API}/wishlist`,
-        {
-          headers:{
-            Authorization:
-              `Bearer ${currentToken}`
-          }
-        }
-      );
-
-
-    const data =
-      response.ok
-        ? await response.json()
-        : [];
-
-
-    const items =
-      Array.isArray(data)
-        ? data
-        : data.items || [];
-
-
-    if ($("#wishCount")) {
-
-      $("#wishCount").textContent =
-        items.length;
-
-    }
-
-
-  } catch (error) {
-
-    console.error(error);
-
-  }
-
-}
+})();

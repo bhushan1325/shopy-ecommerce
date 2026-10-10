@@ -1,93 +1,92 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>My Orders - Shopora</title>
-<link href="/style.css?v=10" rel="stylesheet"/>
-<link href="/orders.css?v=10" rel="stylesheet"/>
-<link href="/shopy-brand.css" rel="stylesheet"/>
-<link href="/shopy-premium.css" rel="stylesheet"/></head>
-<body>
-<header class="orders-navbar">
-<div class="orders-navbar-inner">
-<a class="orders-logo" href="/">
-            Shopora
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SHOPY — Order History & Tracking</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="/shopy-brand.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="stylesheet" href="/orders.css"/>
+  <link rel="stylesheet" href="/shopy-premium.css"/>
+</head>
+<body style="background-color: var(--paper);">
+
+  <!-- Announcement Bar -->
+  <aside class="announcement-bar" role="region" aria-label="Announcement">
+    <span>FREE SHIPPING ON ORDERS OVER ₹1,999</span>
+    <span class="dot-sep" aria-hidden="true">•</span>
+    <span>EASY RETURNS</span>
+  </aside>
+
+  <!-- Sticky Header -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a href="/" class="site-logo" aria-label="SHOPY Homepage">
+        SHOPY<span class="dot">.</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Primary Navigation">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/?category=Women" class="nav-link">Women</a>
+        <a href="/?category=Men" class="nav-link">Men</a>
+        <a href="/?category=Teens" class="nav-link">Teens</a>
+        <a href="/?category=Kids" class="nav-link">Kids</a>
+        <a href="/?category=Babies" class="nav-link">Babies</a>
+        <a href="/?category=Accessories" class="nav-link">Accessories</a>
+        <a href="/?sale=true" class="nav-link sale">Sale</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="/wishlist.html" class="action-btn" aria-label="Wishlist">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 0 12 5.7a4.8 4.8 0 0 0-8.8 3.1c0 5 8.8 10 8.8 10"/></svg>
+          <span class="badge-count" id="wishCount">0</span>
         </a>
-<nav class="orders-nav-links">
-<a href="/">
-                Home
-            </a>
-<a href="/cart.html">
-                Cart 🛒
-            </a>
-<a href="/wishlist.html">
-                Wishlist ❤️
-            </a>
-<a href="/profile.html">
-                Account
-            </a>
-</nav>
-</div>
-</header>
-<main class="orders-main">
-<section class="orders-hero">
-<div>
-<p class="orders-eyebrow">
-                YOUR SHOPORA ACCOUNT
-            </p>
-<h1>
-                My Orders
-            </h1>
-<p class="orders-subtitle">
-                View your purchases, check order status,
-                and track your deliveries.
-            </p>
-</div>
-</section>
-<section class="orders-content">
-<div class="orders-container" id="ordersContainer">
-<div class="orders-loading">
-<div class="loading-spinner"></div>
-<p>
-                    Loading your orders...
-                </p>
-</div>
-</div>
-</section>
-</main>
-<footer class="orders-footer">
-<div class="orders-footer-inner">
-<div>
-<div class="orders-footer-logo">
-                Shopora
-            </div>
-<p>
-                Your simple and reliable online shopping destination.
-            </p>
-</div>
-<div class="orders-footer-links">
-<a href="/">
-                Home
-            </a>
-<a href="/cart.html">
-                Cart
-            </a>
-<a href="/wishlist.html">
-                Wishlist
-            </a>
-<a href="/profile.html">
-                Account
-            </a>
-</div>
-</div>
-<div class="orders-footer-bottom">
 
-        © 2026 Shopora. All rights reserved.
+        <a href="/cart.html" class="action-btn" aria-label="Shopping Bag">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 8.5h14l-1 12H6l-1-12Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+          <span class="badge-count" id="cartCount">0</span>
+        </a>
 
+        <a href="/profile.html" class="account-pill" id="account">Account</a>
+      </div>
     </div>
-</footer>
-<script src="/orders.js?v=10"></script>
-<script src="/shopy-ui.js"></script></body>
+  </header>
+
+  <main style="max-width: var(--max-w); margin: 0 auto; padding: 40px 36px 80px;">
+    <!-- Page Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 40px; border-bottom: 1px solid var(--shopy-line); padding-bottom: 24px;">
+      <div>
+        <p class="eyebrow-label" style="margin-bottom: 6px;">SHOPY / PURCHASES</p>
+        <h1 style="font-family: var(--serif); font-size: 42px; font-weight: 500; margin: 0; letter-spacing: -1.2px;">
+          Order history.
+        </h1>
+      </div>
+      <a href="/" class="link-underline">CONTINUE BROWSING →</a>
+    </div>
+
+    <!-- Orders Container -->
+    <div id="ordersContainer" style="display: flex; flex-direction: column; gap: 24px;">
+      <div style="text-align: center; padding: 60px 20px;">
+        <p style="color: var(--muted); font-size: 14px;">Retrieving purchase records...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+      <span>© 2026 SHOPY Inc. All rights reserved.</span>
+      <span>Style made for every generation.</span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/shopy-core.js"></script>
+  <script src="/orders.js"></script>
+  <script src="/shopy-ui.js"></script>
+</body>
 </html>

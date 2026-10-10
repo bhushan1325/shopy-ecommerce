@@ -1,533 +1,178 @@
-const token =
-    localStorage.getItem("token");
+/**
+ * SHOPY — Wishlist Controller
+ * Connects directly to /api/wishlist and enables real item removal,
+ * moving to cart with /api/cart/add, and synchronized counters.
+ */
 
+(function () {
+  'use strict';
 
-// =====================================
-// LOAD WISHLIST
-// =====================================
+  document.addEventListener('DOMContentLoaded', () => {
+    loadWishlist();
+  });
 
-async function loadWishlist() {
+  async function loadWishlist() {
+    const container = document.getElementById('wishlistContainer');
+    if (!container) return;
 
-    const container =
-        document.getElementById(
-            "wishlistContainer"
-        );
-
-
-    if (!token) {
-
-        container.innerHTML = `
-            <div class="empty-products">
-
-                <h3>
-                    Login required
-                </h3>
-
-                <p>
-                    Please login to view your wishlist.
-                </p>
-
-                <button
-                    class="primary-button"
-                    onclick="window.location.href='/login.html'"
-                >
-                    Login
-                </button>
-
-            </div>
-        `;
-
-        return;
+    if (!Shopy.isLoggedIn()) {
+      container.innerHTML = `
+        <div class="state-box" style="grid-column: 1 / -1; text-align: center; padding: 70px 24px;">
+          <p class="eyebrow-label">SAVED ITEMS</p>
+          <h2 style="font-family: var(--serif); font-size: 32px; margin: 8px 0 14px;">Sign in to view your wishlist.</h2>
+          <p style="color: var(--muted); max-width: 380px; margin: 0 auto 28px;">
+            Access your curated fashion selections across all devices and add them to your shopping bag.
+          </p>
+          <a href="/login.html" class="btn-shopy-primary">SIGN IN TO SHOPY</a>
+        </div>
+      `;
+      return;
     }
-
 
     try {
+      const res = await Shopy.apiFetch('/wishlist');
 
-        const response =
-            await fetch(
-                "/api/wishlist",
-                {
-                    headers: {
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            );
+      if (res.status === 401) {
+        window.location.href = '/login.html';
+        return;
+      }
 
+      if (!res.ok) {
+        throw new Error('Failed to load wishlist');
+      }
 
-        if (response.status === 401) {
-
-            handleUnauthorized();
-
-            return;
-        }
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Unable to load wishlist"
-            );
-        }
-
-
-        const items =
-            await response.json();
-
-
-        displayWishlist(items);
-
+      const items = await res.json();
+      renderWishlist(Array.isArray(items) ? items : [], container);
+      Shopy.syncHeaderState();
 
     } catch (error) {
-
-        console.error(error);
-
-
-        container.innerHTML = `
-            <div class="empty-products">
-
-                <h3>
-                    Unable to load wishlist
-                </h3>
-
-                <p>
-                    Please try again.
-                </p>
-
-                <button
-                    class="primary-button"
-                    onclick="loadWishlist()"
-                >
-                    Try Again
-                </button>
-
-            </div>
-        `;
+      console.error('Wishlist error:', error);
+      container.innerHTML = `
+        <div class="state-box" style="grid-column: 1 / -1; text-align: center; padding: 60px 24px;">
+          <p class="eyebrow-label">ERROR</p>
+          <h3 style="font-family: var(--serif); font-size: 26px; margin: 8px 0 16px;">Unable to load your saved pieces.</h3>
+          <p style="color: var(--muted); margin-bottom: 24px;">Please check your connection and try again.</p>
+          <button type="button" class="btn-shopy-primary" onclick="loadWishlist()">TRY AGAIN</button>
+        </div>
+      `;
     }
-}
+  }
 
-
-// =====================================
-// DISPLAY WISHLIST
-// =====================================
-
-function displayWishlist(items) {
-
-    const container =
-        document.getElementById(
-            "wishlistContainer"
-        );
-
-
-    if (!items || items.length === 0) {
-
-        container.innerHTML = `
-            <div class="empty-products">
-
-                <h3>
-                    Your wishlist is empty ❤️
-                </h3>
-
-                <p>
-                    Save products you want to buy later.
-                </p>
-
-                <button
-                    class="primary-button"
-                    onclick="window.location.href='/'"
-                >
-                    Explore Products
-                </button>
-
-            </div>
-        `;
-
-        return;
+  function renderWishlist(items, container) {
+    if (!items.length) {
+      container.innerHTML = `
+        <div class="state-box" style="grid-column: 1 / -1; text-align: center; padding: 70px 24px;">
+          <p class="eyebrow-label">EMPTY CURATION</p>
+          <h2 style="font-family: var(--serif); font-size: 32px; margin: 8px 0 14px;">Your wishlist is empty.</h2>
+          <p style="color: var(--muted); max-width: 360px; margin: 0 auto 28px;">
+            Save pieces you admire while browsing to keep them easily accessible for future purchases.
+          </p>
+          <a href="/" class="btn-shopy-primary">EXPLORE NEW ARRIVALS</a>
+        </div>
+      `;
+      return;
     }
 
+    container.innerHTML = items.map(item => {
+      const p = item.product || {};
+      const productId = p.id || item.productId;
+      const isSale = p.salePrice && p.salePrice < p.price;
+      const currentPrice = isSale ? p.salePrice : p.price;
+      const fallbackImage = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80';
+      const imageUrl = p.imageUrl || fallbackImage;
 
-    container.innerHTML = "";
+      return `
+        <article class="product-card-item" data-product-id="${productId}">
+          <div class="card-media">
+            <a href="/product.html?id=${productId}">
+              <img src="${Shopy.esc(imageUrl)}"
+                   alt="${Shopy.esc(p.name || 'Product')}"
+                   loading="lazy"
+                   onerror="this.src='${fallbackImage}'"/>
+            </a>
 
+            <button type="button"
+                    class="btn-card-wish active"
+                    data-remove-id="${productId}"
+                    title="Remove from wishlist"
+                    style="color: var(--wine);">
+              ♥
+            </button>
+          </div>
 
-    items.forEach(item => {
-
-        const product =
-            item.product || {};
-
-
-        const productId =
-            product.id ||
-            item.productId;
-
-
-        const productName =
-            product.name ||
-            "Product";
-
-
-        const price =
-            Number(
-                product.price || 0
-            );
-
-
-        const stock =
-            Number(
-                product.stock || 0
-            );
-
-
-        const card =
-            document.createElement("div");
-
-
-        card.className =
-            "product-card";
-
-
-        card.innerHTML = `
-
-            <div
-                onclick="openProduct(${productId})"
-                style="cursor:pointer;"
-            >
-
-                <div
-                    style="
-                        height:180px;
-                        background:#f3f4f6;
-                        border-radius:8px;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        margin-bottom:15px;
-                    "
-                >
-
-                    ${
-                        product.imageUrl
-                        ?
-                        `<img
-                            src="${escapeHtml(product.imageUrl)}"
-                            alt="${escapeHtml(productName)}"
-                            style="
-                                width:100%;
-                                height:100%;
-                                object-fit:contain;
-                            "
-                        >`
-                        :
-                        `<span
-                            style="font-size:65px;"
-                        >
-                            🛍️
-                        </span>`
-                    }
-
-                </div>
-
-
-                <h3>
-                    ${escapeHtml(productName)}
-                </h3>
-
-
-                <p class="product-price">
-                    ₹${price.toLocaleString("en-IN")}
-                </p>
-
-
-                <p>
-                    ${
-                        stock > 0
-                        ? `Stock: ${stock}`
-                        : "Out of stock"
-                    }
-                </p>
-
+          <div class="card-details">
+            <span class="card-brand">${Shopy.esc(p.brand || 'SHOPY')}</span>
+            <a href="/product.html?id=${productId}" class="card-title">
+              ${Shopy.esc(p.name || 'Garment')}
+            </a>
+            <div class="card-price-row" style="margin-bottom: 14px;">
+              <span class="price-current ${isSale ? 'sale' : ''}">
+                ${Shopy.formatPrice(currentPrice)}
+              </span>
+              ${isSale
+                ? `<span class="price-original">${Shopy.formatPrice(p.price)}</span>`
+                : ''
+              }
             </div>
 
+            <div style="display: flex; gap: 8px;">
+              <button type="button"
+                      class="btn-shopy-primary btn-move-cart"
+                      data-product-id="${productId}"
+                      style="flex: 1; padding: 9px 14px; font-size: 10px;">
+                ADD TO BAG
+              </button>
+              <button type="button"
+                      class="btn-shopy-outline btn-remove-wish"
+                      data-remove-id="${productId}"
+                      style="padding: 9px 12px; font-size: 10px;"
+                      title="Remove">
+                ✕
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
 
-            <button
-                onclick="addWishlistProductToCart(${productId})"
-                ${
-                    stock <= 0
-                    ? "disabled"
-                    : ""
-                }
-            >
-                ${
-                    stock > 0
-                    ? "Add to Cart"
-                    : "Out of Stock"
-                }
-            </button>
-
-
-            <button
-                onclick="removeFromWishlist(${productId})"
-                style="
-                    margin-top:8px;
-                    background:#e74c3c;
-                    color:white;
-                "
-            >
-                Remove from Wishlist
-            </button>
-
-        `;
-
-
-        if (stock <= 0) {
-
-            const addButton =
-                card.querySelector(
-                    "button"
-                );
-
-
-            if (addButton) {
-
-                addButton.style.background =
-                    "#9ca3af";
-
-                addButton.style.cursor =
-                    "not-allowed";
-            }
-        }
-
-
-        container.appendChild(card);
-
+    // Attach remove handlers
+    container.querySelectorAll('[data-remove-id]').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = btn.getAttribute('data-remove-id');
+        await removeWishlistItem(id);
+      });
     });
-}
 
+    // Attach Add to Bag handlers
+    container.querySelectorAll('.btn-move-cart').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const id = btn.getAttribute('data-product-id');
+        btn.disabled = true;
+        btn.textContent = 'Adding...';
+        const success = await Shopy.addToCart(id, 1);
+        btn.disabled = false;
+        btn.textContent = 'ADD TO BAG';
+      });
+    });
+  }
 
-// =====================================
-// ADD TO CART
-// =====================================
-
-async function addWishlistProductToCart(
-    productId
-) {
-
-    if (!token) {
-
-        handleUnauthorized();
-
-        return;
-    }
-
-
+  async function removeWishlistItem(productId) {
     try {
+      const res = await Shopy.apiFetch(`/wishlist/remove?productId=${productId}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Could not remove from wishlist');
 
-        const response =
-            await fetch(
-                `/api/cart/add?productId=${productId}&quantity=1`,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                await response.text()
-            );
-        }
-
-
-        alert(
-            "Product added to cart!"
-        );
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to add product to cart."
-        );
+      Shopy.showToast('Removed from wishlist.', 'info');
+      await loadWishlist();
+    } catch (err) {
+      console.error('Remove wishlist error:', err);
+      Shopy.showToast('Could not remove piece', 'error');
     }
-}
+  }
 
-
-// =====================================
-// REMOVE WISHLIST
-// =====================================
-
-async function removeFromWishlist(
-    productId
-) {
-
-    if (!token) {
-
-        handleUnauthorized();
-
-        return;
-    }
-
-
-    const confirmed =
-        confirm(
-            "Remove this product from your wishlist?"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
-
-        const response =
-            await fetch(
-                `/api/wishlist/remove?productId=${productId}`,
-                {
-                    method: "DELETE",
-
-                    headers: {
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                await response.text()
-            );
-        }
-
-
-        await loadWishlist();
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to remove product from wishlist."
-        );
-    }
-}
-
-
-// =====================================
-// OPEN PRODUCT
-// =====================================
-
-function openProduct(productId) {
-
-    window.location.href =
-        `/product.html?id=${productId}`;
-}
-
-
-// =====================================
-// SEARCH
-// =====================================
-
-function searchProducts() {
-
-    const input =
-        document.getElementById(
-            "searchInput"
-        );
-
-
-    const keyword =
-        input.value.trim();
-
-
-    if (!keyword) {
-
-        window.location.href = "/";
-
-        return;
-    }
-
-
-    window.location.href =
-        "/?search=" +
-        encodeURIComponent(
-            keyword
-        );
-}
-
-
-function handleSearchKey(event) {
-
-    if (event.key === "Enter") {
-
-        searchProducts();
-    }
-}
-
-
-// =====================================
-// UNAUTHORIZED
-// =====================================
-
-function handleUnauthorized() {
-
-    localStorage.removeItem("token");
-
-    localStorage.removeItem("user");
-
-    alert(
-        "Your login session has expired. Please login again."
-    );
-
-    window.location.href =
-        "/login.html";
-}
-
-
-// =====================================
-// HTML SECURITY
-// =====================================
-
-function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-    }
-
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
-// =====================================
-// START
-// =====================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        loadWishlist();
-
-    }
-);
+  window.loadWishlist = loadWishlist;
+})();

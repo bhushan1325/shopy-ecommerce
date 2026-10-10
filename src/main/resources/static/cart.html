@@ -1,179 +1,159 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SHOPY — Shopping Bag</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600&amp;display=swap" rel="stylesheet"/>
-<link href="/cart.css?v=1" rel="stylesheet"/>
-<link href="/shopy-premium.css" rel="stylesheet"/></head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SHOPY — Shopping Bag</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="/shopy-brand.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="stylesheet" href="/cart.css"/>
+</head>
 <body>
-<div class="announcement">
-    FREE SHIPPING ON ORDERS OVER ₹1,999
-    <span>•</span>
-    EASY RETURNS
-</div>
-<header class="site-header">
-<div class="nav-wrap">
-<a class="logo" href="/">
-            SHOPY<span>.</span>
-</a>
-<nav class="main-nav">
-<a href="/">Home</a>
-<a href="/?category=Women">Women</a>
-<a href="/?category=Men">Men</a>
-<a href="/?category=Teens">Teens</a>
-<a href="/?category=Kids">Kids</a>
-<a href="/?category=Babies">Babies</a>
-<a href="/?category=Accessories">Accessories</a>
-<a class="sale" href="/?sale=true">Sale</a>
-</nav>
-<div class="nav-actions">
-<button aria-label="Search" class="icon-btn" onclick="document.getElementById('searchPanel').classList.toggle('open')" type="button">
-<svg viewbox="0 0 24 24">
-<circle cx="11" cy="11" r="6.5"></circle>
-<path d="M16 16l5 5"></path>
-</svg>
-</button>
-<a aria-label="Wishlist" class="icon-btn" href="/wishlist.html">
-<svg viewbox="0 0 24 24">
-<path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 1 8 4c1.4 0 2.6.6 4 2 1.4-1.4 2.6-2 4-2a4.8 4.8 0 0 1 4.8 4.8z"></path>
-</svg>
-</a>
-<a aria-label="Shopping bag" class="icon-btn bag-btn" href="/cart.html">
-<svg viewbox="0 0 24 24">
-<path d="M5 8h14l-1 12H6L5 8z"></path>
-<path d="M9 8V6a3 3 0 0 1 6 0v2"></path>
-</svg>
-</a>
-<a aria-label="Account" class="icon-btn account-btn" href="/profile.html">
-<svg viewbox="0 0 24 24">
-<circle cx="12" cy="8" r="3.2"></circle>
-<path d="M5.5 20c.8-3.4 3-5.2 6.5-5.2s5.7 1.8 6.5 5.2"></path>
-</svg>
-</a>
-</div>
-</div>
-<div class="search-panel" id="searchPanel">
-<div class="search-inner">
-<label for="cartSearchInput">SEARCH SHOPY</label>
-<div class="search-field">
-<input autocomplete="off" id="cartSearchInput" onkeydown="handleCartSearch(event)" placeholder="Search clothing, accessories, brands..." type="search"/>
-<button onclick="goToSearch()" type="button">
-                    SEARCH
-                </button>
-</div>
-</div>
-</div>
-</header>
-<main>
-<section class="cart-hero">
-<div>
-<p class="eyebrow">
-                SHOPY / BAG
-            </p>
-<h1>
-                Your shopping bag.
-            </h1>
-<p class="hero-copy">
-                Review your selected pieces before you continue to checkout.
-            </p>
-</div>
-<a class="continue-link" href="/">
-            Continue shopping →
+
+  <!-- Announcement Bar -->
+  <aside class="announcement-bar" role="region" aria-label="Announcement">
+    <span>FREE SHIPPING ON ORDERS OVER ₹1,999</span>
+    <span class="dot-sep" aria-hidden="true">•</span>
+    <span>EASY RETURNS</span>
+  </aside>
+
+  <!-- Sticky Header -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a href="/" class="site-logo" aria-label="SHOPY Homepage">
+        SHOPY<span class="dot">.</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Primary Navigation">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/?category=Women" class="nav-link">Women</a>
+        <a href="/?category=Men" class="nav-link">Men</a>
+        <a href="/?category=Teens" class="nav-link">Teens</a>
+        <a href="/?category=Kids" class="nav-link">Kids</a>
+        <a href="/?category=Babies" class="nav-link">Babies</a>
+        <a href="/?category=Accessories" class="nav-link">Accessories</a>
+        <a href="/?sale=true" class="nav-link sale">Sale</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="/wishlist.html" class="action-btn" aria-label="Wishlist">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 0 12 5.7a4.8 4.8 0 0 0-8.8 3.1c0 5 8.8 10 8.8 10"/></svg>
+          <span class="badge-count" id="wishCount">0</span>
         </a>
-</section>
-<section class="cart-layout">
-<div class="cart-main">
-<div class="cart-heading">
-<div>
-<span class="section-label">YOUR SELECTION</span>
-<h2>Shopping bag</h2>
-</div>
-<span class="item-count" id="cartItemCount">
-                    Items: 0
-                </span>
-</div>
-<div id="cartContainer">
-<div class="loading-card">
-<div class="loading-bar"></div>
-<div class="loading-bar short"></div>
-<p>Loading your bag...</p>
-</div>
-</div>
-</div>
-<aside class="summary-card">
-<div class="summary-top">
-<p class="section-label">
-                    ORDER SUMMARY
-                </p>
-<h2>
-                    Summary
-                </h2>
-</div>
-<div class="summary-lines">
-<div>
-<span>Items</span>
-<strong id="summaryItems">—</strong>
-</div>
-<div>
-<span>Shipping</span>
-<strong>FREE</strong>
-</div>
-</div>
-<div class="summary-total">
-<span>Total</span>
-<strong id="cartTotal">
-                    Total: ₹0
-                </strong>
-</div>
-<button class="checkout-btn" onclick="goToCheckout()" type="button">
-                PROCEED TO CHECKOUT
-            </button>
-<p class="secure-note">
-                Secure checkout · Easy returns · Trusted payment
-            </p>
-</aside>
-</section>
-<section class="service-strip">
-<div>
-<span class="service-icon">01</span>
-<strong>FREE DELIVERY</strong>
-<p>On orders over ₹1,999</p>
-</div>
-<div>
-<span class="service-icon">02</span>
-<strong>EASY RETURNS</strong>
-<p>Simple return process</p>
-</div>
-<div>
-<span class="service-icon">03</span>
-<strong>SECURE PAYMENT</strong>
-<p>Your payment is protected</p>
-</div>
-</section>
-</main>
-<footer>
-<div class="footer-top">
-<a class="footer-logo" href="/">
-            SHOPY<span>.</span>
-</a>
-<p>
-            Fashion for every generation.
+
+        <a href="/cart.html" class="action-btn" aria-label="Shopping Bag">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 8.5h14l-1 12H6l-1-12Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+          <span class="badge-count" id="cartCount">0</span>
+        </a>
+
+        <a href="/login.html" class="account-pill" id="account">Account</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: var(--max-w); margin: 0 auto; padding: 40px 36px 80px;">
+    <!-- Page Header -->
+    <section class="cart-hero" style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 40px; border-bottom: 1px solid var(--shopy-line); padding-bottom: 24px;">
+      <div>
+        <p class="eyebrow-label" style="margin-bottom: 6px;">SHOPY / SHOPPING BAG</p>
+        <h1 style="font-family: var(--serif); font-size: 42px; font-weight: 500; margin: 0; letter-spacing: -1.2px;">
+          Your selected pieces.
+        </h1>
+      </div>
+      <a href="/" class="link-underline">CONTINUE SHOPPING →</a>
+    </section>
+
+    <!-- Main Layout -->
+    <div class="cart-layout-grid">
+      <!-- Left: Line items -->
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin: 0;">Garments in Bag</h2>
+          <span id="cartItemCount" style="font-size: 12px; color: var(--muted); font-weight: 600;">Items: 0</span>
+        </div>
+        <div id="cartContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Right: Order Summary Card -->
+      <aside class="summary-card" style="
+        border: 1px solid var(--shopy-line);
+        border-radius: 8px;
+        padding: 30px;
+        background: var(--paper);
+        position: sticky;
+        top: 100px;
+      ">
+        <p class="eyebrow-label" style="margin-bottom: 8px;">ORDER BREAKDOWN</p>
+        <h3 style="font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0 0 24px; letter-spacing: -0.5px;">Summary</h3>
+
+        <div style="display: flex; flex-direction: column; gap: 14px; font-size: 14px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--muted);">Pieces Selected</span>
+            <strong id="summaryItems">—</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--muted);">Standard Express Shipping</span>
+            <strong style="color: var(--wine);">FREE</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--muted);">Taxes & Duties</span>
+            <span>Included</span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 28px;">
+          <span style="font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">Estimated Total</span>
+          <strong id="cartTotal" style="font-size: 24px; font-weight: 700; color: var(--ink);">Total: ₹0</strong>
+        </div>
+
+        <button class="btn-shopy-primary" onclick="goToCheckout()" style="width: 100%; height: 50px; font-size: 12px;" type="button">
+          PROCEED TO CHECKOUT
+        </button>
+
+        <p style="text-align: center; font-size: 11px; color: var(--muted); margin: 16px 0 0; line-height: 1.4;">
+          Secure 256-bit SSL encryption · Free returns across India
         </p>
-</div>
-<div class="footer-bottom">
-<span>© 2026 SHOPY. All rights reserved.</span>
-<div>
-<a href="/">Shop</a>
-<a href="/wishlist.html">Wishlist</a>
-<a href="/profile.html">Account</a>
-</div>
-</div>
-</footer>
-<script src="/cart.js?v=1"></script>
-<script src="/shopy-ui.js"></script></body>
+      </aside>
+    </div>
+
+    <!-- Guarantees -->
+    <section class="service-benefits" style="margin-top: 80px;" aria-label="Store Guarantees">
+      <div class="benefit-item">
+        <span class="benefit-title">FREE SHIPPING</span>
+        <span class="benefit-desc">Complimentary delivery on all orders over ₹1,999.</span>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-title">EASY RETURNS</span>
+        <span class="benefit-desc">Hassle-free 14-day exchange or refund guarantee.</span>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-title">SECURE CHECKOUT</span>
+        <span class="benefit-desc">Protected transactions with encrypted payment processing.</span>
+      </div>
+      <div class="benefit-item">
+        <span class="benefit-title">AUTHENTIC QUALITY</span>
+        <span class="benefit-desc">100% verified contemporary fashion pieces.</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+      <span>© 2026 SHOPY Inc. All rights reserved.</span>
+      <span>Style made for every generation.</span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/shopy-core.js"></script>
+  <script src="/cart.js"></script>
+  <script src="/shopy-ui.js"></script>
+</body>
 </html>

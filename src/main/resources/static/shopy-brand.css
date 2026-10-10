@@ -1,23 +1,213 @@
-:root{
-  --shopy-black:#111111;
-  --shopy-white:#ffffff;
-  --shopy-ivory:#f5f2ec;
-  --shopy-stone:#dedad2;
-  --shopy-muted:#77736d;
-  --shopy-wine:#641f2b;
+/* ==========================================================================
+   SHOPY — STYLE FOR EVERY GENERATION
+   MASTER DESIGN SYSTEM & BRAND TOKENS (v2.0)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap');
+
+:root {
+  /* Color Palette */
+  --shopy-ink: #151515;
+  --shopy-paper: #F7F5F0;
+  --shopy-white: #FFFFFF;
+  --shopy-line: #E9E6DF;
+  --shopy-muted: #737373;
+  --shopy-wine: #641F2B;
+  --shopy-wine-light: #7E2838;
+  --shopy-surface: #FAF9F6;
+  --shopy-cream: #EFECE5;
+
+  /* Typography */
+  --shopy-font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --shopy-font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  /* Layout & Widths */
+  --shopy-container-max: 1380px;
+  --shopy-container-narrow: 1040px;
+  --shopy-header-height: 76px;
+  --shopy-announce-height: 32px;
+
+  /* Radii & Shadows */
+  --shopy-radius-sm: 4px;
+  --shopy-radius-md: 8px;
+  --shopy-radius-lg: 16px;
+  --shopy-radius-pill: 999px;
+  --shopy-shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.035);
+  --shopy-shadow-card: 0 10px 30px rgba(0, 0, 0, 0.05);
+  --shopy-shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.08);
+
+  /* Transitions */
+  --shopy-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --shopy-transition-fast: 180ms var(--shopy-ease);
+  --shopy-transition-normal: 280ms var(--shopy-ease);
+  --shopy-transition-slow: 400ms var(--shopy-ease);
+
+  /* Z-Index Hierarchy */
+  --shopy-z-base: 1;
+  --shopy-z-sticky: 100;
+  --shopy-z-dropdown: 200;
+  --shopy-z-modal: 1000;
+  --shopy-z-toast: 9999;
 }
-.icon-btn{display:inline-grid!important;place-items:center;width:34px;height:34px;padding:0!important;background:none!important;border:0!important;color:inherit;cursor:pointer}
-.icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.55;stroke-linecap:round;stroke-linejoin:round}
-.count-link{position:relative}
-.count-link i{top:-3px!important;right:-4px!important}
-.account-link{white-space:nowrap}
-.site-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid transparent}
-.site-header.scrolled{border-bottom-color:var(--line)}
-.nav{background:transparent}
-.logo{font-family:Arial,sans-serif;font-weight:900;letter-spacing:-2.8px}
-.logo span{color:var(--shopy-wine)}
-@media(max-width:700px){
-  .account-link{display:none!important}
-  .actions{gap:4px!important}
-  .icon-btn{width:32px;height:32px}
+
+/* Base resets & typography */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 15px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--shopy-font-sans);
+  color: var(--shopy-ink);
+  background-color: var(--shopy-white);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity var(--shopy-transition-fast), color var(--shopy-transition-fast);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Common Brand Elements */
+.shopy-logo-brand {
+  font-family: var(--shopy-font-sans);
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: -1.5px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--shopy-ink);
+}
+
+.shopy-logo-brand span.dot {
+  color: var(--shopy-wine);
+  font-size: 26px;
+  line-height: 0;
+  margin-left: 1px;
+}
+
+/* Shared Buttons */
+.btn-shopy-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--shopy-ink);
+  color: var(--shopy-white);
+  border: 1px solid var(--shopy-ink);
+  padding: 13px 28px;
+  border-radius: var(--shopy-radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--shopy-transition-fast);
+}
+
+.btn-shopy-primary:hover {
+  background-color: #2b2b2b;
+  border-color: #2b2b2b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-shopy-primary:active {
+  transform: translateY(0);
+}
+
+.btn-shopy-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--shopy-ink);
+  border: 1px solid var(--shopy-ink);
+  padding: 13px 28px;
+  border-radius: var(--shopy-radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--shopy-transition-fast);
+}
+
+.btn-shopy-outline:hover {
+  background-color: var(--shopy-ink);
+  color: var(--shopy-white);
+}
+
+.btn-shopy-wine {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--shopy-wine);
+  color: var(--shopy-white);
+  border: 1px solid var(--shopy-wine);
+  padding: 13px 28px;
+  border-radius: var(--shopy-radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all var(--shopy-transition-fast);
+}
+
+.btn-shopy-wine:hover {
+  background-color: var(--shopy-wine-light);
+  border-color: var(--shopy-wine-light);
+  transform: translateY(-1px);
+}
+
+/* Two-column responsive layout utility */
+.profile-layout-grid,
+.two-col-responsive {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 48px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .profile-layout-grid,
+  .two-col-responsive {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* Subtle focus outline for accessibility */
+:focus-visible {
+  outline: 2px solid var(--shopy-ink);
+  outline-offset: 3px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

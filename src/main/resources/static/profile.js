@@ -1,726 +1,267 @@
-const token = localStorage.getItem("token");
+/**
+ * SHOPY — Profile & Address Book Controller
+ * Complete integration with /api/users/profile and /api/addresses CRUD.
+ */
 
-if (!token) {
-    alert("Please login first.");
-    window.location.href = "login.html";
-}
+(function () {
+  'use strict';
 
-const API_BASE = "";
+  let addressListCache = [];
 
-document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Shopy.requireAuth('/profile.html')) return;
 
     loadProfile();
     loadAddresses();
+    bindEvents();
+  });
 
-    const profileForm =
-        document.getElementById("profileForm");
-
-    const addressForm =
-        document.getElementById("addressForm");
-
-    const addAddressBtn =
-        document.getElementById("addAddressBtn");
-
-    const cancelAddressBtn =
-        document.getElementById("cancelAddressBtn");
-
-    const logoutBtn =
-        document.getElementById("logoutBtn");
-
+  function bindEvents() {
+    const profileForm = document.getElementById('profileForm');
+    const addressForm = document.getElementById('addressForm');
+    const addAddressBtn = document.getElementById('addAddressBtn');
+    const cancelAddressBtn = document.getElementById('cancelAddressBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     if (profileForm) {
-        profileForm.addEventListener(
-            "submit",
-            updateProfile
-        );
+      profileForm.addEventListener('submit', updateProfile);
     }
 
     if (addressForm) {
-        addressForm.addEventListener(
-            "submit",
-            saveAddress
-        );
+      addressForm.addEventListener('submit', saveAddress);
     }
 
     if (addAddressBtn) {
-        addAddressBtn.addEventListener(
-            "click",
-            showAddAddressForm
-        );
+      addAddressBtn.addEventListener('click', () => showAddressForm(null));
     }
 
     if (cancelAddressBtn) {
-        cancelAddressBtn.addEventListener(
-            "click",
-            hideAddressForm
-        );
+      cancelAddressBtn.addEventListener('click', hideAddressForm);
     }
 
     if (logoutBtn) {
-        logoutBtn.addEventListener(
-            "click",
-            logout
-        );
+      logoutBtn.addEventListener('click', () => {
+        Shopy.clearAuth();
+        Shopy.showToast('You have been signed out.', 'info');
+        setTimeout(() => { window.location.href = '/'; }, 500);
+      });
     }
-});
+  }
 
-
-async function loadProfile() {
-
+  /* ==========================================================================
+     1. PROFILE DETAILS
+     ========================================================================== */
+  async function loadProfile() {
     try {
+      const res = await Shopy.apiFetch('/users/profile');
+      if (res.status === 401) {
+        window.location.href = '/login.html';
+        return;
+      }
+      if (!res.ok) throw new Error('Could not load profile');
 
-        const response = await fetch(
-            `${API_BASE}/api/users/profile`,
-            {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            }
-        );
+      const user = await res.json();
+      document.getElementById('name').value = user.name || '';
+      document.getElementById('username').value = user.username || '';
+      document.getElementById('email').value = user.email || '';
 
-        if (response.status === 401) {
-            handleUnauthorized();
-            return;
-        }
-
-        if (!response.ok) {
-            throw new Error(
-                "Unable to load profile"
-            );
-        }
-
-        const user = await response.json();
-
-        localStorage.setItem(
-            "user",
-            JSON.stringify(user)
-        );
-
-        displayUser(user);
-
-    } catch (error) {
-
-        console.error(error);
-
-        const savedUser =
-            localStorage.getItem("user");
-
-        if (savedUser) {
-            displayUser(
-                JSON.parse(savedUser)
-            );
-        }
+      // Update cached user in storage
+      localStorage.setItem('user', JSON.stringify(user));
+    } catch (err) {
+      console.error('Profile fetch error:', err);
+      Shopy.showToast('Unable to load client profile details.', 'error');
     }
-}
+  }
 
-
-function displayUser(user) {
-
-    document.getElementById("name").value =
-        user.name || "";
-
-    document.getElementById("username").value =
-        user.username || "";
-
-    document.getElementById("email").value =
-        user.email || "";
-}
-
-
-async function updateProfile(event) {
-
-    event.preventDefault();
-
-    const name =
-        document.getElementById("name").value.trim();
-
-    const email =
-        document.getElementById("email").value.trim();
-
+  async function updateProfile(e) {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
 
     if (!name || !email) {
-        alert("Please fill all fields.");
-        return;
+      Shopy.showToast('Name and email cannot be empty.', 'error');
+      return;
     }
-
 
     try {
+      const res = await Shopy.apiFetch('/users/profile', {
+        method: 'PUT',
+        body: { name, email }
+      });
 
-        const response = await fetch(
-            `${API_BASE}/api/users/profile`,
-            {
-                method: "PUT",
+      if (!res.ok) throw new Error('Could not update profile');
 
-                headers: {
-                    "Content-Type":
-                        "application/json",
-
-                    "Authorization":
-                        `Bearer ${token}`
-                },
-
-                body: JSON.stringify({
-                    name: name,
-                    email: email
-                })
-            }
-        );
-
-
-        if (response.status === 401) {
-            handleUnauthorized();
-            return;
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            alert(
-                data.message ||
-                "Unable to update profile."
-            );
-
-            return;
-        }
-
-
-        localStorage.setItem(
-            "user",
-            JSON.stringify(data)
-        );
-
-        displayUser(data);
-
-        alert(
-            "Profile updated successfully!"
-        );
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to connect to server."
-        );
+      const updated = await res.json();
+      localStorage.setItem('user', JSON.stringify(updated));
+      Shopy.showToast('Profile information saved.', 'success');
+      Shopy.syncHeaderState();
+    } catch (err) {
+      console.error('Update profile error:', err);
+      Shopy.showToast('Failed to update profile.', 'error');
     }
-}
+  }
 
-
-/* =========================
-   ADDRESS MANAGEMENT
-========================= */
-
-
-async function loadAddresses() {
-
-    const addressList =
-        document.getElementById("addressList");
+  /* ==========================================================================
+     2. ADDRESS BOOK CRUD
+     ========================================================================== */
+  async function loadAddresses() {
+    const listContainer = document.getElementById('addressList');
+    if (!listContainer) return;
 
     try {
+      const res = await Shopy.apiFetch('/addresses');
+      if (res.status === 401) return;
+      if (!res.ok) throw new Error('Could not load addresses');
 
-        const response = await fetch(
-            `${API_BASE}/api/addresses`,
-            {
-                method: "GET",
-                headers: {
-                    "Authorization":
-                        `Bearer ${token}`
-                }
-            }
-        );
-
-
-        if (response.status === 401) {
-            handleUnauthorized();
-            return;
-        }
-
-
-        if (!response.ok) {
-            throw new Error(
-                "Unable to load addresses"
-            );
-        }
-
-
-        const addresses =
-            await response.json();
-
-
-        if (!addresses ||
-            addresses.length === 0) {
-
-            addressList.innerHTML = `
-                <p>No saved addresses yet.</p>
-            `;
-
-            return;
-        }
-
-
-        addressList.innerHTML =
-            addresses.map(address => `
-
-                <div class="address-card">
-
-                    <strong>
-                        ${escapeHtml(
-                            address.fullName || ""
-                        )}
-                    </strong>
-
-                    <div>
-                        ${escapeHtml(
-                            address.phone || ""
-                        )}
-                    </div>
-
-                    <div>
-                        ${escapeHtml(
-                            address.addressLine || ""
-                        )}
-                    </div>
-
-                    <div>
-                        ${escapeHtml(
-                            address.city || ""
-                        )},
-                        ${escapeHtml(
-                            address.state || ""
-                        )}
-                        -
-                        ${escapeHtml(
-                            address.postalCode || ""
-                        )}
-                    </div>
-
-                    <div>
-                        ${escapeHtml(
-                            address.country || ""
-                        )}
-                    </div>
-
-                    <div class="address-actions">
-
-                        <button
-                            type="button"
-                            class="profile-btn"
-                            onclick="editAddress(${address.id})">
-
-                            Edit
-
-                        </button>
-
-                        <button
-                            type="button"
-                            class="profile-btn danger-btn"
-                            onclick="deleteAddress(${address.id})">
-
-                            Delete
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `).join("");
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        addressList.innerHTML = `
-            <p>
-                Unable to load addresses.
-            </p>
-        `;
+      addressListCache = await res.json();
+      renderAddressList(Array.isArray(addressListCache) ? addressListCache : [], listContainer);
+    } catch (err) {
+      console.error('Addresses fetch error:', err);
+      listContainer.innerHTML = '<p style="color:var(--muted);font-size:13px;">Unable to load addresses.</p>';
     }
-}
+  }
 
+  function renderAddressList(addresses, container) {
+    if (!addresses.length) {
+      container.innerHTML = `
+        <div style="padding: 24px; background: var(--paper); border-radius: 6px; text-align: center;">
+          <p style="margin: 0 0 8px; font-weight: 700; font-size: 14px;">No addresses saved yet</p>
+          <p style="margin: 0; font-size: 12px; color: var(--muted);">Add a delivery destination for express one-click checkout.</p>
+        </div>
+      `;
+      return;
+    }
 
-function showAddAddressForm() {
+    container.innerHTML = addresses.map(addr => `
+      <div style="border: 1px solid var(--shopy-line); border-radius: 6px; padding: 18px; display: flex; justify-content: space-between; align-items: flex-start; background: var(--paper);">
+        <div>
+          <strong style="display: block; font-size: 15px; margin-bottom: 4px; color: var(--ink);">
+            ${Shopy.esc(addr.fullName)}
+          </strong>
+          <p style="margin: 0 0 4px; font-size: 13px; color: #555; line-height: 1.4;">
+            ${Shopy.esc(addr.addressLine)}, ${Shopy.esc(addr.city)}, ${Shopy.esc(addr.state)} – ${Shopy.esc(addr.postalCode)}
+          </p>
+          <span style="font-size: 12px; color: var(--muted); font-weight: 600;">
+            Phone: ${Shopy.esc(addr.phone)} · ${Shopy.esc(addr.country || 'India')}
+          </span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-edit-addr" data-id="${addr.id}" style="background: none; border: 1px solid var(--line); border-radius: 4px; padding: 6px 12px; font-size: 11px; cursor: pointer; font-weight: 700;">
+            Edit
+          </button>
+          <button type="button" class="btn-del-addr" data-id="${addr.id}" style="background: none; border: 1px solid var(--wine); color: var(--wine); border-radius: 4px; padding: 6px 12px; font-size: 11px; cursor: pointer; font-weight: 700;">
+            Delete
+          </button>
+        </div>
+      </div>
+    `).join('');
 
-    document.getElementById(
-        "addressFormContainer"
-    ).classList.remove("hidden");
+    // Attach Edit Handlers
+    container.querySelectorAll('.btn-edit-addr').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = Number(btn.getAttribute('data-id'));
+        const addr = addressListCache.find(a => Number(a.id) === id);
+        if (addr) showAddressForm(addr);
+      });
+    });
 
-    document.getElementById(
-        "addressFormTitle"
-    ).textContent = "Add Address";
+    // Attach Delete Handlers
+    container.querySelectorAll('.btn-del-addr').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        if (confirm('Are you sure you want to delete this address?')) {
+          await deleteAddress(id);
+        }
+      });
+    });
+  }
 
-    document.getElementById(
-        "addressForm"
-    ).reset();
+  function showAddressForm(addr) {
+    const box = document.getElementById('addressFormBox');
+    const title = document.getElementById('addressFormTitle');
+    if (!box) return;
 
-    document.getElementById(
-        "addressId"
-    ).value = "";
+    box.style.display = 'block';
 
-    document.getElementById(
-        "addressCountry"
-    ).value = "India";
-}
+    if (addr) {
+      if (title) title.textContent = 'Edit Destination Address';
+      document.getElementById('addressId').value = addr.id;
+      document.getElementById('addressFullName').value = addr.fullName || '';
+      document.getElementById('phone').value = addr.phone || '';
+      document.getElementById('addressLine').value = addr.addressLine || '';
+      document.getElementById('city').value = addr.city || '';
+      document.getElementById('state').value = addr.state || '';
+      document.getElementById('postalCode').value = addr.postalCode || '';
+      document.getElementById('country').value = addr.country || 'India';
+    } else {
+      if (title) title.textContent = 'Add New Delivery Address';
+      document.getElementById('addressForm').reset();
+      document.getElementById('addressId').value = '';
+      document.getElementById('country').value = 'India';
+    }
 
+    box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 
-function hideAddressForm() {
+  function hideAddressForm() {
+    const box = document.getElementById('addressFormBox');
+    if (box) box.style.display = 'none';
+  }
 
-    document.getElementById(
-        "addressFormContainer"
-    ).classList.add("hidden");
-}
+  async function saveAddress(e) {
+    e.preventDefault();
 
+    const id = document.getElementById('addressId').value;
+    const fullName = document.getElementById('addressFullName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const addressLine = document.getElementById('addressLine').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const postalCode = document.getElementById('postalCode').value.trim();
+    const country = document.getElementById('country').value.trim() || 'India';
 
-async function editAddress(id) {
+    if (!fullName || !phone || !addressLine || !city || !state || !postalCode) {
+      Shopy.showToast('Please fill all required address fields.', 'error');
+      return;
+    }
+
+    const payload = { fullName, phone, addressLine, city, state, postalCode, country };
+    const method = id ? 'PUT' : 'POST';
+    const endpoint = id ? `/addresses/${id}` : '/addresses';
 
     try {
+      const res = await Shopy.apiFetch(endpoint, {
+        method,
+        body: payload
+      });
 
-        const response = await fetch(
-            `${API_BASE}/api/addresses/${id}`,
-            {
-                method: "GET",
-                headers: {
-                    "Authorization":
-                        `Bearer ${token}`
-                }
-            }
-        );
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err || 'Could not save address');
+      }
 
-
-        if (response.status === 401) {
-            handleUnauthorized();
-            return;
-        }
-
-
-        const address =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            alert(
-                address.message ||
-                "Unable to load address."
-            );
-
-            return;
-        }
-
-
-        document.getElementById(
-            "addressFormContainer"
-        ).classList.remove("hidden");
-
-
-        document.getElementById(
-            "addressFormTitle"
-        ).textContent =
-            "Edit Address";
-
-
-        document.getElementById(
-            "addressId"
-        ).value =
-            address.id || "";
-
-
-        document.getElementById(
-            "addressFullName"
-        ).value =
-            address.fullName || "";
-
-
-        document.getElementById(
-            "addressPhone"
-        ).value =
-            address.phone || "";
-
-
-        document.getElementById(
-            "addressLine"
-        ).value =
-            address.addressLine || "";
-
-
-        document.getElementById(
-            "addressCity"
-        ).value =
-            address.city || "";
-
-
-        document.getElementById(
-            "addressState"
-        ).value =
-            address.state || "";
-
-
-        document.getElementById(
-            "addressPostalCode"
-        ).value =
-            address.postalCode || "";
-
-
-        document.getElementById(
-            "addressCountry"
-        ).value =
-            address.country || "India";
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to load address."
-        );
+      Shopy.showToast(id ? 'Address updated.' : 'New address saved.', 'success');
+      hideAddressForm();
+      await loadAddresses();
+    } catch (err) {
+      console.error('Save address error:', err);
+      Shopy.showToast('Unable to save address.', 'error');
     }
-}
+  }
 
-
-async function saveAddress(event) {
-
-    event.preventDefault();
-
-
-    const id =
-        document.getElementById(
-            "addressId"
-        ).value;
-
-
-    const address = {
-
-        fullName:
-            document.getElementById(
-                "addressFullName"
-            ).value.trim(),
-
-        phone:
-            document.getElementById(
-                "addressPhone"
-            ).value.trim(),
-
-        addressLine:
-            document.getElementById(
-                "addressLine"
-            ).value.trim(),
-
-        city:
-            document.getElementById(
-                "addressCity"
-            ).value.trim(),
-
-        state:
-            document.getElementById(
-                "addressState"
-            ).value.trim(),
-
-        postalCode:
-            document.getElementById(
-                "addressPostalCode"
-            ).value.trim(),
-
-        country:
-            document.getElementById(
-                "addressCountry"
-            ).value.trim()
-    };
-
-
+  async function deleteAddress(id) {
     try {
+      const res = await Shopy.apiFetch(`/addresses/${id}`, {
+        method: 'DELETE'
+      });
+      if (!res.ok) throw new Error('Could not delete address');
 
-        const url = id
-            ? `${API_BASE}/api/addresses/${id}`
-            : `${API_BASE}/api/addresses`;
-
-
-        const method = id
-            ? "PUT"
-            : "POST";
-
-
-        const response = await fetch(
-            url,
-            {
-                method: method,
-
-                headers: {
-                    "Content-Type":
-                        "application/json",
-
-                    "Authorization":
-                        `Bearer ${token}`
-                },
-
-                body: JSON.stringify(address)
-            }
-        );
-
-
-        if (response.status === 401) {
-            handleUnauthorized();
-            return;
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            alert(
-                data.message ||
-                "Unable to save address."
-            );
-
-            return;
-        }
-
-
-        alert(
-            id
-                ? "Address updated successfully!"
-                : "Address added successfully!"
-        );
-
-
-        hideAddressForm();
-
-        loadAddresses();
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to connect to server."
-        );
+      Shopy.showToast('Address removed.', 'info');
+      await loadAddresses();
+    } catch (err) {
+      console.error('Delete address error:', err);
+      Shopy.showToast('Failed to delete address.', 'error');
     }
-}
+  }
 
-
-async function deleteAddress(id) {
-
-    const confirmed =
-        confirm(
-            "Are you sure you want to delete this address?"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
-
-        const response = await fetch(
-            `${API_BASE}/api/addresses/${id}`,
-            {
-                method: "DELETE",
-
-                headers: {
-                    "Authorization":
-                        `Bearer ${token}`
-                }
-            }
-        );
-
-
-        if (response.status === 401) {
-            handleUnauthorized();
-            return;
-        }
-
-
-        if (!response.ok) {
-
-            const data =
-                await response.json();
-
-            alert(
-                data.message ||
-                "Unable to delete address."
-            );
-
-            return;
-        }
-
-
-        alert(
-            "Address deleted successfully!"
-        );
-
-        loadAddresses();
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        alert(
-            "Unable to connect to server."
-        );
-    }
-}
-
-
-/* =========================
-   LOGOUT
-========================= */
-
-
-function logout() {
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("currentOrderId");
-    localStorage.removeItem("lastPayment");
-
-    window.location.href =
-        "login.html";
-}
-
-
-/* =========================
-   AUTH
-========================= */
-
-
-function handleUnauthorized() {
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    alert(
-        "Your session has expired. Please login again."
-    );
-
-    window.location.href =
-        "login.html";
-}
-
-
-/* =========================
-   SECURITY
-========================= */
-
-
-function escapeHtml(value) {
-
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
+})();

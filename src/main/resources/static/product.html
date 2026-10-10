@@ -1,247 +1,240 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SHOPY — Product</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Playfair+Display:wght@500;600&amp;display=swap" rel="stylesheet"/>
-<link href="/product.css" rel="stylesheet"/>
-<link href="/shopy-brand.css" rel="stylesheet"/>
-<link href="/shopy-premium.css" rel="stylesheet"/></head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SHOPY — Product Details</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="/shopy-brand.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="stylesheet" href="/product.css"/>
+</head>
 <body>
-<header class="site-header">
-<div class="announcement">FREE SHIPPING ON ORDERS OVER ₹1,999 <b>•</b> EASY RETURNS</div>
-<div class="nav">
-<button aria-controls="mobileNav" aria-expanded="false" aria-label="Open menu" class="mobile icon-btn" id="menuBtn" type="button">
-<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
-</button>
-<a aria-label="SHOPY home" class="logo" href="/">SHOPY<span>.</span></a>
-<nav aria-label="Main navigation">
-<a href="/?category=Women">Women</a>
-<a href="/?category=Men">Men</a>
-<a href="/?category=Teens">Teens</a>
-<a href="/?category=Kids">Kids</a>
-<a href="/?category=Babies">Babies</a>
-<a href="/?category=Accessories">Accessories</a>
-<a class="sale" href="/?sale=true">Sale</a>
-</nav>
-<div class="actions">
-<button aria-controls="searchBox" aria-expanded="false" aria-label="Search" class="icon-btn" id="searchBtn" type="button">
-<svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 5 5"></path></svg>
-</button>
-<a aria-label="Wishlist" class="icon-btn count-link" href="/wishlist.html">
-<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 1 12 5.7a4.8 4.8 0 0 1 8.8 3.1Z"></path></svg>
-<i id="wishCount">0</i>
-</a>
-<a aria-label="Shopping bag" class="icon-btn count-link" href="/cart.html">
-<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M5 8.5h14l-1 12H6l-1-12Z"></path><path d="M9 9V6a3 3 0 0 1 6 0v3"></path></svg>
-<i id="cartCount">0</i>
-</a>
-<a class="account-link" href="/login.html" id="account">Account</a>
-</div>
-</div>
-<div class="mobileNav" id="mobileNav">
-<a href="/?category=Women">Women</a><a href="/?category=Men">Men</a>
-<a href="/?category=Teens">Teens</a><a href="/?category=Kids">Kids</a>
-<a href="/?category=Babies">Babies</a><a href="/?category=Accessories">Accessories</a>
-<a href="/?sale=true">Sale</a>
-</div>
-<div class="search" id="searchBox">
-<form id="searchForm">
-<input autocomplete="off" id="searchInput" placeholder="Search products, styles, brands..." type="search"/>
-<button type="submit">Search</button>
-</form>
-<small>Trending:
-      <button data-q="hoodie" type="button">Hoodies</button>
-<button data-q="dress" type="button">Dresses</button>
-<button data-q="jeans" type="button">Jeans</button>
-<button data-q="bags" type="button">Bags</button>
-</small>
-</div>
-</header>
-<main>
-<div class="crumbs">
-<a href="/">Home</a>
-<span>/</span>
-<span id="crumbName">Product</span>
-</div>
-<section class="state" id="productState">
-    Loading product...
-  </section>
-<section class="product-view hidden" id="productView">
-<div class="gallery">
-<div class="gallery-main">
-<div class="badge hidden" id="badge"></div>
-<button aria-label="Add to wishlist" class="gallery-wish" id="galleryWish" type="button">
-<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 1 12 5.7a4.8 4.8 0 0 1 8.8 3.1Z"></path></svg>
-</button>
-<img alt="" class="main-image" id="mainImage" src=""/>
-</div>
-<div aria-label="Product images" class="thumbs" id="thumbs"></div>
-<p class="gallery-note">PRODUCT IMAGES MAY VARY SLIGHTLY BY DISPLAY</p>
-</div>
-<div class="details">
-<p class="brand" id="brand"></p>
-<h1 id="name"></h1>
-<div class="rating-row">
-<span id="rating"></span>
-<span id="reviews"></span>
-</div>
-<div class="price-row">
-<strong id="salePrice"></strong>
-<del id="price"></del>
-<span id="discount"></span>
-</div>
-<p class="description" id="description"></p>
-<!-- SIZE -->
-<div class="option-block">
-<div class="option-head">
-<strong>Size</strong>
-<button id="sizeGuide" type="button">
-            Size guide
+
+  <!-- Announcement Bar -->
+  <aside class="announcement-bar" role="region" aria-label="Announcement">
+    <span>FREE SHIPPING ON ORDERS OVER ₹1,999</span>
+    <span class="dot-sep" aria-hidden="true">•</span>
+    <span>EASY RETURNS</span>
+  </aside>
+
+  <!-- Sticky Header -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <button class="mobile-menu-btn" id="menuBtn" aria-label="Toggle navigation menu" aria-expanded="false" type="button">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+
+      <a href="/" class="site-logo" aria-label="SHOPY Homepage">
+        SHOPY<span class="dot">.</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Primary Navigation">
+        <a href="/?category=Women" class="nav-link" data-cat="Women">Women</a>
+        <a href="/?category=Men" class="nav-link" data-cat="Men">Men</a>
+        <a href="/?category=Teens" class="nav-link" data-cat="Teens">Teens</a>
+        <a href="/?category=Kids" class="nav-link" data-cat="Kids">Kids</a>
+        <a href="/?category=Babies" class="nav-link" data-cat="Babies">Babies</a>
+        <a href="/?category=Accessories" class="nav-link" data-cat="Accessories">Accessories</a>
+        <a href="/?sale=true" class="nav-link sale" data-cat="Sale">Sale</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="action-btn" id="searchBtn" aria-label="Open search form" type="button">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4.5 4.5"/></svg>
+        </button>
+
+        <a href="/wishlist.html" class="action-btn" aria-label="Wishlist">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 0 12 5.7a4.8 4.8 0 0 0-8.8 3.1c0 5 8.8 10 8.8 10"/></svg>
+          <span class="badge-count" id="wishCount">0</span>
+        </a>
+
+        <a href="/cart.html" class="action-btn" aria-label="Shopping Bag">
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 8.5h14l-1 12H6l-1-12Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+          <span class="badge-count" id="cartCount">0</span>
+        </a>
+
+        <a href="/login.html" class="account-pill" id="account">Account</a>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-drawer" id="mobileNav" aria-hidden="true">
+      <div class="mobile-nav-links">
+        <a href="/?category=Women">Women</a>
+        <a href="/?category=Men">Men</a>
+        <a href="/?category=Teens">Teens</a>
+        <a href="/?category=Kids">Kids</a>
+        <a href="/?category=Babies">Babies</a>
+        <a href="/?category=Accessories">Accessories</a>
+        <a href="/?sale=true" style="color:var(--wine);">Sale</a>
+        <a href="/orders.html">My Orders</a>
+        <a href="/profile.html">My Profile</a>
+      </div>
+    </div>
+
+    <!-- Search Dropdown Panel -->
+    <div class="search-dropdown" id="searchBox" aria-hidden="true">
+      <div class="search-form-container">
+        <form id="searchForm" class="search-form-row">
+          <input type="text" id="searchInput" placeholder="Search by style, garment, or collection..." autocomplete="off" aria-label="Search products"/>
+          <button type="submit" class="search-submit-btn">Search</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: var(--max-w); margin: 0 auto; padding: 24px 36px 80px;">
+    <!-- Breadcrumbs -->
+    <div class="crumbs" style="margin-bottom: 24px; font-size: 12px; color: var(--muted); display: flex; gap: 8px;">
+      <a href="/" style="color: var(--ink); font-weight: 600;">Home</a>
+      <span>/</span>
+      <span id="crumbCategory">Collection</span>
+      <span>/</span>
+      <span id="crumbName" style="color: var(--ink);">Product</span>
+    </div>
+
+    <!-- Loading / Error State Container -->
+    <section class="state" id="productState" style="text-align: center; padding: 60px 0; font-size: 16px;">
+      Loading garment details...
+    </section>
+
+    <!-- Main Product Presentation -->
+    <section class="product-view hidden" id="productView">
+      <!-- Media Gallery -->
+      <div class="gallery">
+        <div class="gallery-main" style="position: relative;">
+          <div class="badge hidden" id="badge"></div>
+          <button aria-label="Add to wishlist" class="gallery-wish" id="galleryWish" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.8 8.8c0 5-8.8 10-8.8 10s-8.8-5-8.8-10A4.8 4.8 0 0 1 12 5.7a4.8 4.8 0 0 1 8.8 3.1Z"/></svg>
           </button>
-</div>
-<div class="options" id="sizes"></div>
-</div>
-<!-- COLOR -->
-<div class="option-block">
-<div class="option-head">
-<strong>Color</strong>
-<span id="selectedColor"></span>
-</div>
-<div class="color-options" id="colors"></div>
-</div>
-<!-- PRODUCT INFORMATION -->
-<div class="info-grid">
-<div>
-<span>Material</span>
-<strong id="material">—</strong>
-</div>
-<div>
-<span>Fit</span>
-<strong id="fit">—</strong>
-</div>
-<div>
-<span>Style</span>
-<strong id="style">—</strong>
-</div>
-<div>
-<span>Availability</span>
-<strong id="availability">—</strong>
-</div>
-</div>
-<!-- ACTIONS -->
-<div class="actions">
-<button class="primary" id="addBag" type="button">
-          ADD TO BAG
-        </button>
-<button class="secondary" id="buyNow" type="button">
-          BUY NOW
-        </button>
-<button aria-label="Add to wishlist" class="wish" id="wish" type="button">
-          ♡
-        </button>
-</div>
-<div class="product-services">
-<div class="service-row"><span class="service-icon">01</span><div><strong>FREE SHIPPING</strong><span>On orders over ₹1,999</span></div></div>
-<div class="service-row"><span class="service-icon">02</span><div><strong>EASY RETURNS</strong><span>Simple returns on eligible items</span></div></div>
-<div class="service-row"><span class="service-icon">03</span><div><strong>SECURE CHECKOUT</strong><span>Protected payment flow</span></div></div>
-</div>
-<!-- ACCORDIONS -->
-<div class="accordions">
-<details open="">
-<summary>
-            Product details
-          </summary>
-<p id="care">
-            Designed for everyday wear.
-            See the material and care information above.
-          </p>
-</details>
-<details>
-<summary>
-            Delivery &amp; returns
-          </summary>
-<p>
-            Delivery availability and return options
-            are shown during checkout.
-          </p>
-</details>
-</div>
-</div>
-</section>
-</main>
-<!-- =========================================
-     SIZE GUIDE MODAL
-========================================= -->
-<div aria-hidden="true" class="modal hidden" id="sizeModal">
-<div aria-labelledby="sizeGuideTitle" aria-modal="true" class="modal-card" role="dialog">
-<button aria-label="Close size guide" class="close" id="closeModal" type="button">
-      ×
-    </button>
-<p class="eyebrow">
-      SHOPY / GUIDE
-    </p>
-<h2 id="sizeGuideTitle">
-      Find your size.
-    </h2>
-<p class="modal-description">
-      Use this as a general guide.
-      Product-specific fit may vary.
-    </p>
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>Size</th>
-<th>Chest</th>
-<th>Waist</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>XS</td>
-<td>32–34"</td>
-<td>26–28"</td>
-</tr>
-<tr>
-<td>S</td>
-<td>34–36"</td>
-<td>28–30"</td>
-</tr>
-<tr>
-<td>M</td>
-<td>36–38"</td>
-<td>30–32"</td>
-</tr>
-<tr>
-<td>L</td>
-<td>38–40"</td>
-<td>32–34"</td>
-</tr>
-<tr>
-<td>XL</td>
-<td>40–42"</td>
-<td>34–36"</td>
-</tr>
-<tr>
-<td>XXL</td>
-<td>42–44"</td>
-<td>36–38"</td>
-</tr>
-</tbody>
-</table>
-</div>
-<!-- REAL CANCEL BUTTON -->
-<button class="cancel-size-guide" id="cancelSizeGuide" type="button">
-      CANCEL
-    </button>
-</div>
-</div>
-<div class="toast" id="toast"></div>
-<script src="/product.js"></script>
-<script src="/shopy-ui.js"></script></body>
+          <img alt="Product presentation" class="main-image" id="mainImage" src=""/>
+        </div>
+        <div aria-label="Product images" class="thumbs" id="thumbs"></div>
+        <p class="gallery-note" style="margin-top: 12px; font-size: 10px; color: var(--muted); letter-spacing: 0.8px;">EDITORIAL DETAIL VIEW</p>
+      </div>
+
+      <!-- Product Information & Order Actions -->
+      <div class="details">
+        <p class="brand" id="brand" style="font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin: 0 0 6px;"></p>
+        <h1 id="name" style="font-family: var(--serif); font-size: 38px; font-weight: 500; margin: 0 0 14px; line-height: 1.15; letter-spacing: -1px;"></h1>
+
+        <div class="rating-row" style="display: flex; gap: 8px; align-items: center; margin-bottom: 16px; font-size: 13px; color: #92702b;">
+          <span id="rating"></span>
+          <span id="reviews" style="color: var(--muted);"></span>
+        </div>
+
+        <div class="price-row" style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px;">
+          <strong id="salePrice" style="font-size: 24px; font-weight: 700; color: var(--ink);"></strong>
+          <del id="price" style="font-size: 16px; color: #a09d98;"></del>
+          <span id="discount" style="background: var(--wine); color: white; padding: 2px 8px; border-radius: 2px; font-size: 10px; font-weight: 800;"></span>
+        </div>
+
+        <p class="description" id="description" style="font-size: 14px; line-height: 1.6; color: #5a5752; margin-bottom: 28px;"></p>
+
+        <!-- Size Selection -->
+        <div class="option-block" style="margin-bottom: 24px;">
+          <div class="option-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px;">Select Size</strong>
+            <button id="sizeGuide" type="button" style="background: none; border: none; font-size: 11px; text-decoration: underline; cursor: pointer; color: var(--muted);">
+              Size Guide
+            </button>
+          </div>
+          <div class="options" id="sizes" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+        </div>
+
+        <!-- Color Selection -->
+        <div class="option-block" style="margin-bottom: 24px;">
+          <div class="option-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px;">Color: <span id="selectedColor" style="font-weight: 500; text-transform: capitalize;"></span></strong>
+          </div>
+          <div class="color-options" id="colors" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+        </div>
+
+        <!-- Garment Specifications -->
+        <div class="info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; padding: 18px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 28px; font-size: 13px;">
+          <div><span style="color: var(--muted); display: block; font-size: 11px;">Material:</span> <strong id="material">—</strong></div>
+          <div><span style="color: var(--muted); display: block; font-size: 11px;">Fit:</span> <strong id="fit">—</strong></div>
+          <div><span style="color: var(--muted); display: block; font-size: 11px;">Style:</span> <strong id="style">—</strong></div>
+          <div><span style="color: var(--muted); display: block; font-size: 11px;">Availability:</span> <strong id="availability">—</strong></div>
+        </div>
+
+        <!-- Order Action Buttons -->
+        <div class="actions" style="display: flex; gap: 14px; margin-bottom: 32px;">
+          <button class="primary btn-shopy-primary" id="addBag" type="button" style="flex: 2; height: 50px; font-size: 12px;">
+            ADD TO BAG
+          </button>
+          <button class="secondary btn-shopy-outline" id="buyNow" type="button" style="flex: 2; height: 50px; font-size: 12px;">
+            BUY NOW
+          </button>
+          <button aria-label="Add to wishlist" class="wish" id="wish" type="button" style="flex: 0 0 50px; height: 50px; border-radius: 50%; border: 1px solid var(--line); background: white; font-size: 20px; cursor: pointer;">
+            ♡
+          </button>
+        </div>
+
+        <!-- Reassurance Strip -->
+        <div class="product-services" style="display: flex; flex-direction: column; gap: 12px; padding: 18px; background: var(--paper); border-radius: 8px; margin-bottom: 24px; font-size: 12px;">
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <span style="font-weight: 800; color: var(--wine);">01</span>
+            <div><strong>FREE SHIPPING</strong> — On orders over ₹1,999</div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <span style="font-weight: 800; color: var(--wine);">02</span>
+            <div><strong>EASY RETURNS</strong> — Simple exchange & return window</div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <span style="font-weight: 800; color: var(--wine);">03</span>
+            <div><strong>SECURE PAYMENT</strong> — Encrypted checkout flow</div>
+          </div>
+        </div>
+
+        <!-- Accordions -->
+        <div class="accordions" style="border-top: 1px solid var(--line);">
+          <details open style="padding: 14px 0; border-bottom: 1px solid var(--line);">
+            <summary style="font-weight: 700; cursor: pointer; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Product Details & Care</summary>
+            <p id="care" style="margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.6;">Designed for timeless elegance and lasting comfort. Follow care label instructions for optimal garment longevity.</p>
+          </details>
+          <details style="padding: 14px 0; border-bottom: 1px solid var(--line);">
+            <summary style="font-weight: 700; cursor: pointer; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Shipping & Delivery</summary>
+            <p style="margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.6;">Orders typically dispatch within 24-48 business hours with express tracked courier service across India.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Size Guide Modal -->
+  <div aria-hidden="true" class="modal hidden" id="sizeModal">
+    <div aria-labelledby="sizeGuideTitle" aria-modal="true" class="modal-card" role="dialog">
+      <button aria-label="Close size guide" class="close" id="closeModal" type="button">×</button>
+      <p class="eyebrow" style="font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: var(--muted);">SHOPY / MEASUREMENTS</p>
+      <h2 id="sizeGuideTitle" style="font-family: var(--serif); font-size: 28px; margin: 4px 0 16px;">Standard Fit Guide.</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Size</th><th>Chest (in)</th><th>Waist (in)</th><th>Hips (in)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>S</td><td>34–36"</td><td>28–30"</td><td>35–37"</td></tr>
+            <tr><td>M</td><td>36–38"</td><td>30–32"</td><td>38–40"</td></tr>
+            <tr><td>L</td><td>38–40"</td><td>32–34"</td><td>41–43"</td></tr>
+            <tr><td>XL</td><td>40–42"</td><td>34–36"</td><td>44–46"</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="cancel-size-guide btn-shopy-outline" id="cancelSizeGuide" type="button" style="margin-top: 20px;">
+        CLOSE GUIDE
+      </button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/shopy-core.js"></script>
+  <script src="/product.js"></script>
+  <script src="/shopy-ui.js"></script>
+</body>
 </html>

@@ -1,116 +1,70 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>
-        Order Confirmed - Shopora
-    </title>
-<link href="style.css" rel="stylesheet"/>
-<link href="/shopy-premium.css" rel="stylesheet"/></head>
-<body>
-<header class="navbar">
-<div class="logo">
-        Shopora
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SHOPY — Order Confirmed</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="/shopy-brand.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="stylesheet" href="/shopy-premium.css"/>
+</head>
+<body style="background-color: var(--paper);">
+
+  <!-- Navbar -->
+  <header style="background: white; border-bottom: 1px solid var(--line); padding: 18px 36px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="/" class="site-logo">SHOPY<span class="dot">.</span></a>
+    <a href="/" class="link-underline">CONTINUE BROWSING →</a>
+  </header>
+
+  <main style="max-width: 780px; margin: 0 auto; padding: 60px 24px 80px;">
+    <div style="background: white; border: 1px solid var(--line); border-radius: 8px; padding: 48px; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.04);">
+      
+      <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); margin: 0 auto 20px; display: grid; place-items: center; font-size: 24px;">
+        ✓
+      </div>
+
+      <p class="eyebrow-label" style="margin-bottom: 8px;">THANK YOU FOR YOUR PATRONAGE</p>
+      <h1 style="font-family: var(--serif); font-size: 40px; font-weight: 500; margin: 0 0 14px; letter-spacing: -1px;">
+        Your order is confirmed.
+      </h1>
+      <p style="color: var(--muted); max-width: 440px; margin: 0 auto 36px; font-size: 14px; line-height: 1.6;">
+        We have received your payment and are now preparing your curated pieces for dispatch.
+      </p>
+
+      <!-- Details Container -->
+      <div id="orderDetails" style="
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 24px;
+        text-align: left;
+        margin-bottom: 36px;
+        font-size: 14px;
+      ">
+        <p style="color: var(--muted); margin: 0; text-align: center;">Loading order summary...</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+        <button id="trackBtn" type="button" class="btn-shopy-primary" style="padding: 14px 28px; font-size: 11px;">
+          TRACK SHIPMENT
+        </button>
+        <button id="ordersBtn" type="button" class="btn-shopy-outline" style="padding: 14px 28px; font-size: 11px;">
+          VIEW ALL ORDERS
+        </button>
+      </div>
+
     </div>
-<nav class="nav-links">
-<a href="/">
-            Home
-        </a>
-<a href="/cart.html">
-            Cart 🛒
-        </a>
-<a href="/wishlist.html">
-            Wishlist ❤️
-        </a>
-</nav>
-</header>
-<main>
-<section class="cart-page">
-<div class="cart-total" style="
-                text-align:center;
-                padding:50px 25px;
-            ">
-<div style="
-                    font-size:70px;
-                    margin-bottom:20px;
-                ">
-                ✅
-            </div>
-<h1 style="
-                    margin-bottom:10px;
-                    color:#16803c;
-                ">
-                Order Confirmed!
-            </h1>
-<p style="
-                    color:#6b7280;
-                    margin-bottom:30px;
-                ">
-                Thank you for shopping with Shopora.
-            </p>
-<div id="orderDetails" style="
-                    max-width:550px;
-                    margin:0 auto 30px;
-                    text-align:left;
-                    background:#f9fafb;
-                    padding:25px;
-                    border-radius:8px;
-                ">
-                Loading order details...
-            </div>
-<div style="
-                    display:flex;
-                    gap:12px;
-                    justify-content:center;
-                    flex-wrap:wrap;
-                ">
-<button class="primary-button" onclick="trackOrder()">
-                    Track Order
-                </button>
-<button onclick="viewOrders()" style="
-                        padding:13px 22px;
-                        border:1px solid #d1d5db;
-                        background:white;
-                        border-radius:6px;
-                        cursor:pointer;
-                        font-weight:bold;
-                    ">
-                    My Orders
-                </button>
-<button onclick="continueShopping()" style="
-                        padding:13px 22px;
-                        border:1px solid #d1d5db;
-                        background:white;
-                        border-radius:6px;
-                        cursor:pointer;
-                        font-weight:bold;
-                    ">
-                    Continue Shopping
-                </button>
-</div>
-</div>
-</section>
-</main>
-<footer>
-<div class="footer-content">
-<div>
-<h3>
-                Shopora
-            </h3>
-<p>
-                Your simple and reliable
-                online shopping destination.
-            </p>
-</div>
-</div>
-<div class="footer-bottom">
-<p>
-            © 2026 Shopora. All rights reserved.
-        </p>
-</div>
-</footer>
-<script src="order-success.js"></script>
-<script src="/shopy-ui.js"></script></body>
+  </main>
+
+  <!-- Scripts -->
+  <script src="/shopy-core.js"></script>
+  <script src="/order-success.js"></script>
+  <script src="/shopy-ui.js"></script>
+</body>
 </html>

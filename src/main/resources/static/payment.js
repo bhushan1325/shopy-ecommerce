@@ -1,470 +1,105 @@
-// =====================================
-// SHOPORA PAYMENT
-// =====================================
-
-
-// =====================================
-// GET TOKEN
-// =====================================
-
-const token =
-    localStorage.getItem("token");
-
-
-// =====================================
-// GET ORDER ID
-// =====================================
-
-// First try URL
-const urlParams =
-    new URLSearchParams(
-        window.location.search
-    );
-
-
-// Get orderId from:
-// /payment.html?orderId=7
-
-let orderId =
-    urlParams.get("orderId");
-
-
-// If URL does not contain orderId,
-// use localStorage as backup.
-
-if (!orderId) {
-
-    orderId =
-        localStorage.getItem(
-            "currentOrderId"
-        );
-}
-
-
-// Save it for the success page.
-
-if (orderId) {
-
-    localStorage.setItem(
-        "currentOrderId",
-        String(orderId)
-    );
-}
-
-
-// =====================================
-// CHECK LOGIN
-// =====================================
-
-if (!token) {
-
-    alert(
-        "Please login first."
-    );
-
-    window.location.href =
-        "/login.html";
-}
-
-
-// =====================================
-// CHECK ORDER
-// =====================================
-
-if (!orderId) {
-
-    alert(
-        "No active order found."
-    );
-
-    window.location.href =
-        "/orders.html";
-}
-
-
-// =====================================
-// LOAD ORDER
-// =====================================
-
-async function loadOrder() {
-
-    try {
-
-        const response =
-            await fetch(
-                "/api/orders/user",
-                {
-                    method: "GET",
-
-                    headers: {
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            );
-
-
-        if (response.status === 401) {
-
-            handleUnauthorized();
-
-            return;
-        }
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Unable to load orders"
-            );
-        }
-
-
-        const data =
-            await response.json();
-
-
-        const orders =
-            Array.isArray(data)
-                ? data
-                : (
-                    data.content ||
-                    data.orders ||
-                    []
-                );
-
-
-        const order =
-            orders.find(
-                item =>
-                    Number(item.id) ===
-                    Number(orderId)
-            );
-
-
-        if (!order) {
-
-            throw new Error(
-                "Order not found"
-            );
-        }
-
-
-        displayOrder(order);
-
-
-    } catch (error) {
-
-        console.error(
-            "Load order error:",
-            error
-        );
-
-
-        const orderIdElement =
-            document.getElementById(
-                "orderId"
-            );
-
-
-        const amountElement =
-            document.getElementById(
-                "paymentAmount"
-            );
-
-
-        if (orderIdElement) {
-
-            orderIdElement.innerText =
-                "Order ID: #" + orderId;
-        }
-
-
-        if (amountElement) {
-
-            amountElement.innerText =
-                "Amount: Unable to load";
-        }
-
-
-        alert(
-            "Unable to load this order. Please check My Orders."
-        );
-    }
-}
-
-
-// =====================================
-// DISPLAY ORDER
-// =====================================
-
-function displayOrder(order) {
-
-    const orderIdElement =
-        document.getElementById(
-            "orderId"
-        );
-
-
-    const amountElement =
-        document.getElementById(
-            "paymentAmount"
-        );
-
-
-    if (orderIdElement) {
-
-        orderIdElement.innerText =
-            "Order ID: #" +
-            order.id;
-    }
-
-
-    const amount =
-        Number(
-            order.totalAmount ??
-            order.total ??
-            0
-        );
-
-
-    if (
-        amountElement &&
-        !Number.isNaN(amount)
-    ) {
-
-        amountElement.innerText =
-            "Amount: ₹" +
-            amount.toLocaleString(
-                "en-IN"
-            );
-    }
-}
-
-
-// =====================================
-// MAKE PAYMENT
-// =====================================
-
-async function makePayment(event) {
-
-    event.preventDefault();
-
-
-    if (!token) {
-
-        handleUnauthorized();
-
-        return;
-    }
-
+/**
+ * SHOPY — Payment Controller
+ * Connects to /api/payments, handles verification of active order amount,
+ * and securely confirms transactions with the Spring Boot backend.
+ */
+
+(function () {
+  'use strict';
+
+  const urlParams = new URLSearchParams(window.location.search);
+  let orderId = urlParams.get('orderId') || localStorage.getItem('currentOrderId');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Shopy.requireAuth(`/payment.html?orderId=${orderId || ''}`)) return;
 
     if (!orderId) {
-
-        alert(
-            "Order information is missing."
-        );
-
-        return;
+      Shopy.showToast('No active order selected for payment.', 'error');
+      setTimeout(() => { window.location.href = '/orders.html'; }, 800);
+      return;
     }
 
+    loadOrderInfo();
+    bindPaymentForm();
+  });
 
-    const selectedMethod =
-        document.querySelector(
-            'input[name="paymentMethod"]:checked'
-        );
-
-
-    if (!selectedMethod) {
-
-        alert(
-            "Please select a payment method."
-        );
-
-        return;
-    }
-
-
-    const method =
-        selectedMethod.value;
-
-
-    const button =
-        document.getElementById(
-            "payButton"
-        );
-
-
-    if (button) {
-
-        button.disabled = true;
-
-        button.innerText =
-            "Processing Payment...";
-    }
-
+  async function loadOrderInfo() {
+    const orderIdEl = document.getElementById('orderId');
+    const amountEl = document.getElementById('paymentAmount');
 
     try {
+      const res = await Shopy.apiFetch('/orders/user');
+      if (!res.ok) throw new Error('Could not retrieve order details');
 
-        const response =
-            await fetch(
-                "/api/payments",
-                {
-                    method: "POST",
+      const data = await res.json();
+      const orders = Array.isArray(data) ? data : (data.content || data.orders || []);
+      const currentOrder = orders.find(o => Number(o.id) === Number(orderId));
 
-                    headers: {
+      if (!currentOrder) {
+        throw new Error('Order not found in your account.');
+      }
 
-                        "Content-Type":
-                            "application/json",
+      if (orderIdEl) orderIdEl.textContent = `Order #${currentOrder.id}`;
+      if (amountEl) amountEl.textContent = Shopy.formatPrice(currentOrder.totalAmount);
 
-                        "Authorization":
-                            "Bearer " + token
-                    },
+    } catch (err) {
+      console.error('Payment order fetch error:', err);
+      Shopy.showToast(err.message || 'Unable to verify order amount.', 'error');
+      if (orderIdEl) orderIdEl.textContent = `Order #${orderId}`;
+    }
+  }
 
-                    body: JSON.stringify({
+  function bindPaymentForm() {
+    const form = document.getElementById('paymentForm');
+    const payBtn = document.getElementById('payButton');
 
-                        orderId:
-                            Number(orderId),
+    if (!form) return;
 
-                        method:
-                            method
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-                    })
-                }
-            );
+      const selectedMethodEl = form.querySelector('input[name="paymentMethod"]:checked');
+      const method = selectedMethodEl ? selectedMethodEl.value : 'UPI';
 
+      if (payBtn) {
+        payBtn.disabled = true;
+        payBtn.textContent = 'AUTHORIZING PAYMENT...';
+      }
 
-        if (response.status === 401) {
-
-            handleUnauthorized();
-
-            return;
-        }
-
+      try {
+        const response = await Shopy.apiFetch('/payments', {
+          method: 'POST',
+          body: {
+            orderId: Number(orderId),
+            method: method
+          }
+        });
 
         if (!response.ok) {
-
-            const errorText =
-                await response.text();
-
-
-            throw new Error(
-                errorText ||
-                "Payment failed"
-            );
+          const errText = await response.text();
+          throw new Error(errText || 'Transaction authorization declined');
         }
 
+        const paymentData = await response.json();
+        localStorage.setItem('lastPayment', JSON.stringify(paymentData));
+        localStorage.setItem('currentOrderId', String(orderId));
 
-        const payment =
-            await response.json();
+        Shopy.showToast('Payment approved! Confirming order...', 'success');
 
+        setTimeout(() => {
+          window.location.href = `/order-success.html?orderId=${orderId}`;
+        }, 600);
 
-        // =====================================
-        // SAVE PAYMENT
-        // =====================================
+      } catch (error) {
+        console.error('Payment error:', error);
+        Shopy.showToast(error.message || 'Payment processing failed. Please try again.', 'error');
 
-        localStorage.setItem(
-            "lastPayment",
-            JSON.stringify(payment)
-        );
-
-
-        // =====================================
-        // KEEP ORDER ID
-        // =====================================
-
-        localStorage.setItem(
-            "currentOrderId",
-            String(orderId)
-        );
-
-
-        // =====================================
-        // SUCCESS PAGE
-        // =====================================
-
-        window.location.href =
-            `/order-success.html?orderId=${orderId}`;
-
-
-    } catch (error) {
-
-        console.error(
-            "Payment error:",
-            error
-        );
-
-
-        alert(
-            "Payment failed:\n" +
-            error.message
-        );
-
-
-        if (button) {
-
-            button.disabled = false;
-
-            button.innerText =
-                "Pay Now";
+        if (payBtn) {
+          payBtn.disabled = false;
+          payBtn.textContent = 'AUTHORIZE & COMPLETE PAYMENT';
         }
-    }
-}
+      }
+    });
+  }
 
-
-// =====================================
-// UNAUTHORIZED
-// =====================================
-
-function handleUnauthorized() {
-
-    localStorage.removeItem(
-        "token"
-    );
-
-    localStorage.removeItem(
-        "user"
-    );
-
-    localStorage.removeItem(
-        "currentOrderId"
-    );
-
-
-    alert(
-        "Your login session has expired. Please login again."
-    );
-
-
-    window.location.href =
-        "/login.html";
-}
-
-
-// =====================================
-// PAGE START
-// =====================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const form =
-            document.getElementById(
-                "paymentForm"
-            );
-
-
-        if (form) {
-
-            form.addEventListener(
-                "submit",
-                makePayment
-            );
-        }
-
-
-        loadOrder();
-
-    }
-);
+})();

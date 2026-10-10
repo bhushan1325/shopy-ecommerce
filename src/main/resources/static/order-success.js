@@ -1,525 +1,126 @@
-// =====================================
-// SHOPORA ORDER SUCCESS
-// =====================================
+/**
+ * SHOPY — Order Confirmation Controller
+ * Displays verified order details, transaction ID, and provides
+ * navigation to tracking and order history.
+ */
 
+(function () {
+  'use strict';
 
-// =====================================
-// LOGIN
-// =====================================
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get('orderId') || localStorage.getItem('currentOrderId');
 
-const token =
-    localStorage.getItem("token");
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Shopy.requireAuth()) return;
 
+    loadConfirmation();
+    bindActions();
+  });
 
-// =====================================
-// GET ORDER ID
-// =====================================
+  function bindActions() {
+    const trackBtn = document.getElementById('trackBtn');
+    const ordersBtn = document.getElementById('ordersBtn');
 
-const urlParams =
-    new URLSearchParams(
-        window.location.search
-    );
-
-
-let orderId =
-    urlParams.get("orderId");
-
-
-if (!orderId) {
-
-    orderId =
-        localStorage.getItem(
-            "currentOrderId"
-        );
-}
-
-
-// Keep order ID available.
-
-if (orderId) {
-
-    localStorage.setItem(
-        "currentOrderId",
-        String(orderId)
-    );
-}
-
-
-// =====================================
-// LAST PAYMENT
-// =====================================
-
-const lastPayment =
-    JSON.parse(
-        localStorage.getItem(
-            "lastPayment"
-        ) || "null"
-    );
-
-
-// =====================================
-// CHECK LOGIN
-// =====================================
-
-if (!token) {
-
-    window.location.href =
-        "/login.html";
-}
-
-
-// =====================================
-// LOAD ORDER DETAILS
-// =====================================
-
-async function loadOrderDetails() {
-
-    const container =
-        document.getElementById(
-            "orderDetails"
-        );
-
-
-    if (!container) {
-        return;
+    if (trackBtn) {
+      trackBtn.addEventListener('click', () => {
+        window.location.href = `/tracking.html?orderId=${orderId || ''}`;
+      });
     }
 
-
-    if (!orderId) {
-
-        container.innerHTML = `
-            <p>
-                Order information is unavailable.
-            </p>
-        `;
-
-        return;
+    if (ordersBtn) {
+      ordersBtn.addEventListener('click', () => {
+        window.location.href = '/orders.html';
+      });
     }
+  }
 
+  async function loadConfirmation() {
+    const container = document.getElementById('orderDetails');
+    if (!container || !orderId) return;
+
+    let lastPayment = null;
+    try {
+      lastPayment = JSON.parse(localStorage.getItem('lastPayment') || 'null');
+    } catch (e) {}
 
     try {
+      const res = await Shopy.apiFetch('/orders/user');
+      if (!res.ok) throw new Error('Could not retrieve order details');
 
-        const response =
-            await fetch(
-                "/api/orders/user",
-                {
-                    method: "GET",
+      const data = await res.json();
+      const orders = Array.isArray(data) ? data : (data.content || data.orders || []);
+      const order = orders.find(o => Number(o.id) === Number(orderId));
 
-                    headers: {
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            );
+      if (order) {
+        renderOrderSummary(order, lastPayment, container);
+      } else {
+        renderFallbackSummary(lastPayment, container);
+      }
 
+      // Sync header bag count (should now be 0 as order is placed)
+      Shopy.syncHeaderState();
 
-        if (response.status === 401) {
-
-            handleUnauthorized();
-
-            return;
-        }
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Unable to load orders"
-            );
-        }
-
-
-        const data =
-            await response.json();
-
-
-        const orders =
-            Array.isArray(data)
-                ? data
-                : (
-                    data.content ||
-                    data.orders ||
-                    []
-                );
-
-
-        const order =
-            orders.find(
-                item =>
-                    Number(item.id) ===
-                    Number(orderId)
-            );
-
-
-        if (order) {
-
-            displayOrder(order);
-
-        } else {
-
-            displayPaymentOnly();
-        }
-
-
-    } catch (error) {
-
-        console.error(
-            "Order details error:",
-            error
-        );
-
-
-        displayPaymentOnly();
+    } catch (err) {
+      console.warn('Confirmation fetch error:', err);
+      renderFallbackSummary(lastPayment, container);
     }
-}
+  }
 
-
-// =====================================
-// DISPLAY ORDER
-// =====================================
-
-function displayOrder(order) {
-
-    const container =
-        document.getElementById(
-            "orderDetails"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    const payment =
-        lastPayment;
-
-
-    const amount =
-        Number(
-            order?.totalAmount ??
-            order?.total ??
-            payment?.amount ??
-            0
-        );
-
-
-    const status =
-        order?.status ||
-        "PLACED";
-
-
-    const transactionId =
-        payment?.transactionId ||
-        "Completed";
-
-
-    const paymentMethod =
-        payment?.method ||
-        "Completed";
-
-
+  function renderOrderSummary(order, payment, container) {
     container.innerHTML = `
+      <div style="display:flex; justify-content:space-between; margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px;">
+        <span style="color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase;">Order Reference</span>
+        <strong style="color:var(--ink);">#${order.id}</strong>
+      </div>
 
-        <div
-            style="
-                display:flex;
-                justify-content:space-between;
-                gap:15px;
-                margin-bottom:12px;
-            "
-        >
+      <div style="display:flex; justify-content:space-between; margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px;">
+        <span style="color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase;">Recipient</span>
+        <strong>${Shopy.esc(order.fullName || order.username || 'Client')}</strong>
+      </div>
 
-            <strong>
-                Order ID
-            </strong>
+      <div style="display:flex; justify-content:space-between; margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px;">
+        <span style="color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase;">Delivery Destination</span>
+        <span style="text-align:right; max-width:280px; color:#444;">
+          ${Shopy.esc(order.addressLine || '')}, ${Shopy.esc(order.city || '')}
+        </span>
+      </div>
 
-            <span>
-                #${orderId}
-            </span>
+      <div style="display:flex; justify-content:space-between; margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px;">
+        <span style="color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase;">Status</span>
+        <strong style="color:var(--wine);">${Shopy.esc(order.status || 'CONFIRMED')}</strong>
+      </div>
 
+      ${payment && payment.transactionId ? `
+        <div style="display:flex; justify-content:space-between; margin-bottom: 12px; border-bottom: 1px solid var(--line); padding-bottom: 12px;">
+          <span style="color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase;">Transaction ID</span>
+          <code style="font-size:12px; background:white; padding:2px 6px; border-radius:3px;">${Shopy.esc(payment.transactionId)}</code>
         </div>
+      ` : ''}
 
-
-        <div
-            style="
-                display:flex;
-                justify-content:space-between;
-                gap:15px;
-                margin-bottom:12px;
-            "
-        >
-
-            <strong>
-                Amount
-            </strong>
-
-            <span>
-                ₹${amount.toLocaleString("en-IN")}
-            </span>
-
-        </div>
-
-
-        <div
-            style="
-                display:flex;
-                justify-content:space-between;
-                gap:15px;
-                margin-bottom:12px;
-            "
-        >
-
-            <strong>
-                Payment
-            </strong>
-
-            <span>
-                ${paymentMethod}
-            </span>
-
-        </div>
-
-
-        <div
-            style="
-                display:flex;
-                justify-content:space-between;
-                gap:15px;
-                margin-bottom:12px;
-            "
-        >
-
-            <strong>
-                Transaction ID
-            </strong>
-
-            <span>
-                ${transactionId}
-            </span>
-
-        </div>
-
-
-        <div
-            style="
-                display:flex;
-                justify-content:space-between;
-                gap:15px;
-            "
-        >
-
-            <strong>
-                Status
-            </strong>
-
-            <span
-                style="
-                    color:#16803c;
-                    font-weight:bold;
-                "
-            >
-                ${status}
-            </span>
-
-        </div>
-
+      <div style="display:flex; justify-content:space-between; margin-top: 16px; font-size: 16px;">
+        <span style="font-weight:800; text-transform:uppercase; letter-spacing:0.8px;">Total Paid</span>
+        <strong style="color:var(--ink);">${Shopy.formatPrice(order.totalAmount)}</strong>
+      </div>
     `;
-}
+  }
 
-
-// =====================================
-// PAYMENT-ONLY FALLBACK
-// =====================================
-
-function displayPaymentOnly() {
-
-    const container =
-        document.getElementById(
-            "orderDetails"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    if (!lastPayment) {
-
-        container.innerHTML = `
-
-            <p>
-                <strong>
-                    Order ID:
-                </strong>
-
-                #${orderId}
-            </p>
-
-            <p
-                style="
-                    margin-top:10px;
-                    color:#16803c;
-                    font-weight:bold;
-                "
-            >
-                Order created successfully.
-            </p>
-
-        `;
-
-        return;
-    }
-
-
-    const amount =
-        Number(
-            lastPayment.amount || 0
-        );
-
-
+  function renderFallbackSummary(payment, container) {
     container.innerHTML = `
-
-        <p>
-
-            <strong>
-                Order ID:
-            </strong>
-
-            #${orderId}
-
-        </p>
-
-
-        <p style="margin-top:10px;">
-
-            <strong>
-                Amount:
-            </strong>
-
-            ₹${amount.toLocaleString("en-IN")}
-
-        </p>
-
-
-        <p style="margin-top:10px;">
-
-            <strong>
-                Payment:
-            </strong>
-
-            ${lastPayment.method || "Completed"}
-
-        </p>
-
-
-        <p style="margin-top:10px;">
-
-            <strong>
-                Transaction ID:
-            </strong>
-
-            ${lastPayment.transactionId || "Completed"}
-
-        </p>
-
-
-        <p
-            style="
-                margin-top:10px;
-                color:#16803c;
-                font-weight:bold;
-            "
-        >
-            Payment successful
-        </p>
-
+      <div style="display:flex; justify-content:space-between; margin-bottom: 12px;">
+        <span style="color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase;">Order ID</span>
+        <strong>#${orderId || '—'}</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom: 12px;">
+        <span style="color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase;">Status</span>
+        <strong style="color:var(--wine);">CONFIRMED</strong>
+      </div>
+      ${payment && payment.amount ? `
+        <div style="display:flex; justify-content:space-between; font-size: 16px; margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px;">
+          <span style="font-weight:800; text-transform:uppercase;">Total Amount</span>
+          <strong>${Shopy.formatPrice(payment.amount)}</strong>
+        </div>
+      ` : ''}
     `;
-}
+  }
 
-
-// =====================================
-// TRACK ORDER
-// =====================================
-
-function trackOrder() {
-
-    if (!orderId) {
-
-        alert(
-            "Order ID is unavailable."
-        );
-
-        return;
-    }
-
-
-    window.location.href =
-        `/tracking.html?orderId=${orderId}`;
-}
-
-
-// =====================================
-// MY ORDERS
-// =====================================
-
-function viewOrders() {
-
-    window.location.href =
-        "/orders.html";
-}
-
-
-// =====================================
-// CONTINUE SHOPPING
-// =====================================
-
-function continueShopping() {
-
-    window.location.href =
-        "/";
-}
-
-
-// =====================================
-// UNAUTHORIZED
-// =====================================
-
-function handleUnauthorized() {
-
-    localStorage.removeItem(
-        "token"
-    );
-
-    localStorage.removeItem(
-        "user"
-    );
-
-    localStorage.removeItem(
-        "currentOrderId"
-    );
-
-
-    alert(
-        "Your login session has expired. Please login again."
-    );
-
-
-    window.location.href =
-        "/login.html";
-}
-
-
-// =====================================
-// PAGE START
-// =====================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        loadOrderDetails();
-
-    }
-);
+})();

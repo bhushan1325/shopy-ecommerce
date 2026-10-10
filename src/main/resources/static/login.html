@@ -1,232 +1,62 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Login | Shopora</title>
-<link href="/login.css?v=10" rel="stylesheet"/>
-<link href="/shopy-brand.css" rel="stylesheet"/>
-<link href="/shopy-premium.css" rel="stylesheet"/></head>
-<body>
-<!-- =====================================================
-     HEADER
-     ===================================================== -->
-<header class="login-navbar">
-<a class="shopora-logo" href="/">
-<div class="logo-bag">
-<span>S</span>
-</div>
-<span>Shopora</span>
-</a>
-<a class="home-link" href="/">
-        ← Back to Home
-    </a>
-</header>
-<!-- =====================================================
-     MAIN LOGIN AREA
-     ===================================================== -->
-<main class="login-page">
-<div class="login-container">
-<!-- =================================================
-             LEFT BRANDING PANEL
-             ================================================= -->
-<section class="brand-panel">
-<div class="brand-content">
-<div class="welcome-badge">
-                    WELCOME TO SHOPORA
-                </div>
-<div class="large-logo">
-<div class="large-logo-bag">
-<span>S</span>
-</div>
-</div>
-<h1>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SHOPY — Client Sign In</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="/shopy-brand.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="stylesheet" href="/login.css"/>
+</head>
+<body style="background-color: var(--paper);">
 
-                    Shop smarter.
+  <!-- Navbar -->
+  <header style="background: white; border-bottom: 1px solid var(--line); padding: 18px 36px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="/" class="site-logo">SHOPY<span class="dot">.</span></a>
+    <a href="/" class="link-underline">← RETURN TO STORE</a>
+  </header>
 
-                    <span>
-                        Shopora.
-                    </span>
-</h1>
-<p class="brand-description">
+  <main style="min-height: calc(100vh - 140px); display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    <div style="background: white; border: 1px solid var(--line); border-radius: 8px; width: 100%; max-width: 480px; padding: 44px; box-shadow: 0 16px 40px rgba(0,0,0,0.04);">
+      <p class="eyebrow-label" style="text-align: center; margin-bottom: 8px;">WELCOME BACK</p>
+      <h1 style="font-family: var(--serif); font-size: 34px; font-weight: 500; text-align: center; margin: 0 0 12px; letter-spacing: -1px;">
+        Sign in to your account.
+      </h1>
+      <p style="text-align: center; font-size: 13px; color: var(--muted); margin: 0 0 32px;">
+        Access your orders, saved pieces, and streamlined checkout.
+      </p>
 
-                    Everything you need,
-                    all in one place.
+      <form id="loginForm" style="display: flex; flex-direction: column; gap: 20px;">
+        <div>
+          <label for="username" style="display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px;">Username</label>
+          <input type="text" id="username" name="username" required placeholder="Enter your username" autocomplete="username" style="width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 4px; padding: 0 14px; font-size: 14px; outline: none;"/>
+        </div>
 
-                    Discover products you love,
-                    enjoy secure shopping and
-                    track every order with ease.
+        <div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <label for="password" style="font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;">Password</label>
+          </div>
+          <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password" style="width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 4px; padding: 0 14px; font-size: 14px; outline: none;"/>
+        </div>
 
-                </p>
-<!-- BENEFITS -->
-<div class="benefits">
-<div class="benefit">
-<div class="benefit-icon">
-                            ✓
-                        </div>
-<div>
-<strong>
-                                Secure Shopping
-                            </strong>
-<small>
-                                Your account is protected
-                            </small>
-</div>
-</div>
-<div class="benefit">
-<div class="benefit-icon">
-                            🚚
-                        </div>
-<div>
-<strong>
-                                Easy Ordering
-                            </strong>
-<small>
-                                Shop and manage orders easily
-                            </small>
-</div>
-</div>
-<div class="benefit">
-<div class="benefit-icon">
-                            ♡
-                        </div>
-<div>
-<strong>
-                                Made For You
-                            </strong>
-<small>
-                                A simple shopping experience
-                            </small>
-</div>
-</div>
-</div>
-<!-- DECORATIVE SHOPPING ITEMS -->
-<div class="shopping-decoration">
-<div class="floating-box box-one">
-                        SHOP
-                    </div>
-<div class="floating-box box-two">
-                        S
-                    </div>
-<div class="floating-box box-three">
-                        ✓
-                    </div>
-</div>
-</div>
-</section>
-<!-- =================================================
-             RIGHT LOGIN PANEL
-             ================================================= -->
-<section class="login-panel">
-<div class="login-card">
-<!-- LOGO -->
-<div class="login-brand">
-<div class="small-logo">
-                        S
-                    </div>
-<span>
-                        Shopora
-                    </span>
-</div>
-<h2>
-                    Welcome back
-                </h2>
-<p class="login-description">
-                    Login to your account to continue shopping.
-                </p>
-<!-- =================================================
-                     LOGIN FORM
-                     ================================================= -->
-<form id="loginForm">
-<!-- USERNAME -->
-<div class="form-group">
-<label for="username">
-                            Username
-                        </label>
-<div class="input-container">
-<span class="input-icon">
-                                👤
-                            </span>
-<input autocomplete="username" id="username" name="username" placeholder="Enter your username" required="" type="text"/>
-</div>
-</div>
-<!-- PASSWORD -->
-<div class="form-group">
-<label for="password">
-                            Password
-                        </label>
-<div class="input-container">
-<span class="input-icon">
-                                🔒
-                            </span>
-<input autocomplete="current-password" id="password" name="password" placeholder="Enter your password" required="" type="password"/>
-</div>
-</div>
-<!-- LOGIN BUTTON -->
-<button class="login-button" type="submit">
-<span>
-                            Login to Shopora
-                        </span>
-<span class="button-arrow">
-                            →
-                        </span>
-</button>
-</form>
-<!-- DIVIDER -->
-<div class="divider">
-<span></span>
-<strong>
-                        OR
-                    </strong>
-<span></span>
-</div>
-<!-- REGISTER -->
-<div class="register-section">
-<p>
-                        Don't have a Shopora account?
-                    </p>
-<a href="/register.html">
+        <button type="submit" id="loginSubmitBtn" class="btn-shopy-primary" style="height: 50px; margin-top: 10px; font-size: 12px; width: 100%;">
+          SIGN IN
+        </button>
+      </form>
 
-                        Create a new account
+      <div style="text-align: center; margin-top: 28px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px;">
+        New to SHOPY? <a href="/register.html" style="color: var(--ink); font-weight: 700; text-decoration: underline;">Create an account</a>
+      </div>
+    </div>
+  </main>
 
-                        <span>
-                            →
-                        </span>
-</a>
-</div>
-<!-- SECURITY -->
-<div class="security-box">
-<span class="security-icon">
-                        🔐
-                    </span>
-<div>
-<strong>
-                            Safe &amp; Secure
-                        </strong>
-<small>
-                            Your account information is protected.
-                        </small>
-</div>
-</div>
-</div>
-</section>
-</div>
-</main>
-<!-- =====================================================
-     FOOTER
-     ===================================================== -->
-<footer class="login-footer">
-<span>
-        © 2026 Shopora
-    </span>
-<span>
-        Shop smart. Live better.
-    </span>
-</footer>
-<!-- =====================================================
-     LOGIN JAVASCRIPT
-     ===================================================== -->
-<script src="/login.js?v=10"></script>
-<script src="/shopy-ui.js"></script></body>
+  <script src="/shopy-core.js"></script>
+  <script src="/login.js"></script>
+  <script src="/shopy-ui.js"></script>
+</body>
 </html>

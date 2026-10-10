@@ -38,8 +38,26 @@ public class AdminController {
         stats.put("totalUsers", userRepository.count());
         stats.put("totalOrders", orderRepository.count());
 
-        stats.put("totalRevenue", 0);
+        double totalRevenue = orderRepository.findAll().stream()
+                .mapToDouble(order -> order.getTotalAmount())
+                .sum();
+        stats.put("totalRevenue", totalRevenue);
 
         return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<java.util.List<com.shopora.shopora.dto.UserResponseDTO>> getAllUsers() {
+        java.util.List<com.shopora.shopora.dto.UserResponseDTO> users = userRepository.findAll().stream()
+                .map(u -> new com.shopora.shopora.dto.UserResponseDTO(
+                        u.getId(),
+                        u.getName(),
+                        u.getUsername(),
+                        u.getEmail(),
+                        u.getRole()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(users);
     }
 }

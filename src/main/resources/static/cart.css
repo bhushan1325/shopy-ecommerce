@@ -741,3 +741,17 @@ footer{
         flex-wrap:wrap;
     }
 }
+
+.cart-layout-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr);
+    gap: 48px;
+    align-items: start;
+}
+
+@media (max-width: 860px) {
+    .cart-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+    }
+}

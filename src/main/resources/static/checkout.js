@@ -1,491 +1,230 @@
-// =====================================
-// SHOPORA CHECKOUT
-// =====================================
+/**
+ * SHOPY — Checkout Controller
+ * Verifies cart, offers saved address selection or new address capture,
+ * creates the real order via /api/orders/create, and proceeds to payment.
+ */
 
-function getToken() {
-    return localStorage.getItem("token");
-}
+(function () {
+  'use strict';
 
-let cartItems = [];
-let cartTotal = 0;
+  let checkoutItems = [];
+  let checkoutTotalAmount = 0;
+  let savedAddresses = [];
+  let selectedAddressId = null;
 
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!Shopy.requireAuth('/checkout.html')) return;
 
-// =====================================
-// LOAD CART
-// =====================================
+    loadCheckoutData();
+    bindEvents();
+  });
 
-async function loadCheckoutCart() {
+  function bindEvents() {
+    const placeOrderBtn = document.getElementById('placeOrderButton');
+    if (placeOrderBtn) {
+      placeOrderBtn.addEventListener('click', handleContinueToPayment);
+    }
+  }
 
-    const token = getToken();
+  async function loadCheckoutData() {
+    // 1. Fetch Cart Items
+    try {
+      const itemsRes = await Shopy.apiFetch('/cart/items');
+      if (itemsRes.status === 401) return;
+      if (!itemsRes.ok) throw new Error('Could not retrieve bag items');
 
-    if (!token) {
-        window.location.href = "/login.html";
+      checkoutItems = await itemsRes.json();
+      if (!Array.isArray(checkoutItems) || !checkoutItems.length) {
+        Shopy.showToast('Your shopping bag is empty. Please add items first.', 'error');
+        setTimeout(() => { window.location.href = '/cart.html'; }, 800);
         return;
+      }
+
+      // 2. Fetch Cart Total
+      try {
+        const totalRes = await Shopy.apiFetch('/cart/total');
+        if (totalRes.ok) {
+          const tData = await totalRes.json();
+          checkoutTotalAmount = Number(tData.total || 0);
+        } else {
+          checkoutTotalAmount = checkoutItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+        }
+      } catch (e) {
+        checkoutTotalAmount = checkoutItems.reduce((acc, it) => acc + (Number(it.price || 0) * Number(it.quantity || 1)), 0);
+      }
+
+      const totalQty = checkoutItems.reduce((sum, it) => sum + Number(it.quantity || 0), 0);
+      const countEl = document.getElementById('checkoutItemCount');
+      const totalEl = document.getElementById('checkoutTotal');
+
+      if (countEl) countEl.textContent = `${totalQty} piece${totalQty === 1 ? '' : 's'}`;
+      if (totalEl) totalEl.textContent = Shopy.formatPrice(checkoutTotalAmount);
+
+      // 3. Load Saved Addresses
+      loadSavedAddresses();
+
+    } catch (err) {
+      console.error('Checkout initialization error:', err);
+      Shopy.showToast('Unable to prepare checkout session.', 'error');
+    }
+  }
+
+  async function loadSavedAddresses() {
+    try {
+      const res = await Shopy.apiFetch('/addresses');
+      if (!res.ok) return;
+
+      savedAddresses = await res.json();
+      if (Array.isArray(savedAddresses) && savedAddresses.length > 0) {
+        renderSavedAddresses(savedAddresses);
+      }
+    } catch (err) {
+      console.warn('Could not load saved addresses:', err);
+    }
+  }
+
+  function renderSavedAddresses(addresses) {
+    const section = document.getElementById('savedAddressesSection');
+    const container = document.getElementById('savedAddressesContainer');
+    if (!section || !container) return;
+
+    section.style.display = 'block';
+
+    container.innerHTML = addresses.map((addr, idx) => `
+      <label style="
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        cursor: pointer;
+        background: ${idx === 0 ? 'var(--paper)' : 'white'};
+      ">
+        <input type="radio" name="savedAddressRadio" value="${addr.id}" ${idx === 0 ? 'checked' : ''} style="margin-top: 3px;"/>
+        <div>
+          <strong style="font-size: 14px; display: block; margin-bottom: 2px;">${Shopy.esc(addr.fullName)}</strong>
+          <p style="margin: 0; font-size: 12px; color: #555; line-height: 1.4;">
+            ${Shopy.esc(addr.addressLine)}, ${Shopy.esc(addr.city)}, ${Shopy.esc(addr.state)} – ${Shopy.esc(addr.postalCode)}
+          </p>
+          <span style="font-size: 11px; color: var(--muted);">Ph: ${Shopy.esc(addr.phone)}</span>
+        </div>
+      </label>
+    `).join('') + `
+      <label style="display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 6px; cursor: pointer;">
+        <input type="radio" name="savedAddressRadio" value="new" style="margin: 0;"/>
+        <span style="font-size: 13px; font-weight: 700;">+ Enter a different address below</span>
+      </label>
+    `;
+
+    selectedAddressId = addresses[0].id;
+
+    // Listen for radio change
+    container.querySelectorAll('input[name="savedAddressRadio"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.value === 'new') {
+          selectedAddressId = null;
+        } else {
+          selectedAddressId = Number(radio.value);
+        }
+      });
+    });
+  }
+
+  async function handleContinueToPayment() {
+    const btn = document.getElementById('placeOrderButton');
+    if (!checkoutItems.length) {
+      Shopy.showToast('Your shopping bag is empty.', 'error');
+      return;
+    }
+
+    let finalAddressId = selectedAddressId;
+
+    // If no existing address selected, validate and save new address
+    if (!finalAddressId) {
+      const fullName = document.getElementById('fullName').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const addressLine = document.getElementById('addressLine').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const state = document.getElementById('state').value.trim();
+      const postalCode = document.getElementById('postalCode').value.trim();
+      const country = document.getElementById('country').value.trim() || 'India';
+
+      if (!fullName) { Shopy.showToast('Please enter recipient full name.', 'error'); return; }
+      if (!/^[0-9]{10}$/.test(phone)) { Shopy.showToast('Please enter a valid 10-digit mobile number.', 'error'); return; }
+      if (!addressLine) { Shopy.showToast('Please enter your street address.', 'error'); return; }
+      if (!city) { Shopy.showToast('Please enter your city.', 'error'); return; }
+      if (!state) { Shopy.showToast('Please enter your state.', 'error'); return; }
+      if (!/^[0-9]{6}$/.test(postalCode)) { Shopy.showToast('Please enter a valid 6-digit PIN code.', 'error'); return; }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'SAVING ADDRESS...';
+      }
+
+      try {
+        const addrRes = await Shopy.apiFetch('/addresses', {
+          method: 'POST',
+          body: { fullName, phone, addressLine, city, state, postalCode, country }
+        });
+
+        if (!addrRes.ok) {
+          const errText = await addrRes.text();
+          throw new Error(errText || 'Failed to register delivery address');
+        }
+
+        const savedAddr = await addrRes.json();
+        finalAddressId = savedAddr.id;
+      } catch (err) {
+        console.error('Save address error:', err);
+        Shopy.showToast(err.message || 'Unable to save delivery address.', 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'CONTINUE TO PAYMENT →';
+        }
+        return;
+      }
+    }
+
+    // Now create real order via POST /api/orders/create?addressId={id}
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'RESERVING ORDER...';
     }
 
     try {
+      const orderRes = await Shopy.apiFetch(`/orders/create?addressId=${finalAddressId}`, {
+        method: 'POST'
+      });
 
-        const itemsResponse = await fetch(
-            "/api/cart/items",
-            {
-                method: "GET",
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
-            }
-        );
+      if (!orderRes.ok) {
+        const orderErr = await orderRes.text();
+        throw new Error(orderErr || 'Could not create order reservation');
+      }
 
-        if (itemsResponse.status === 401) {
-            handleUnauthorized();
-            return;
-        }
+      const orderData = await orderRes.json();
+      const orderId = orderData.id || orderData.orderId;
 
-        if (!itemsResponse.ok) {
-            throw new Error("Unable to load cart items");
-        }
+      if (!orderId) {
+        throw new Error('Server confirmed order but omitted order reference ID');
+      }
 
-        cartItems = await itemsResponse.json();
+      // Store current order ID
+      localStorage.setItem('currentOrderId', String(orderId));
+      Shopy.showToast('Order reserved. Directing to payment...', 'success');
 
+      setTimeout(() => {
+        window.location.href = `/payment.html?orderId=${orderId}`;
+      }, 500);
 
-        const totalResponse = await fetch(
-            "/api/cart/total",
-            {
-                method: "GET",
-                headers: {
-                    "Authorization": "Bearer " + token
-                }
-            }
-        );
-
-        if (totalResponse.status === 401) {
-            handleUnauthorized();
-            return;
-        }
-
-        if (!totalResponse.ok) {
-            throw new Error("Unable to load cart total");
-        }
-
-        const totalData = await totalResponse.json();
-
-        cartTotal = Number(totalData.total || 0);
-
-        updateCheckoutSummary();
-
-    } catch (error) {
-
-        console.error(
-            "Checkout cart error:",
-            error
-        );
-
-        const countElement =
-            document.getElementById("checkoutItemCount");
-
-        const totalElement =
-            document.getElementById("checkoutTotal");
-
-        if (countElement) {
-            countElement.textContent = "Items: 0";
-        }
-
-        if (totalElement) {
-            totalElement.textContent = "Total: ₹0";
-        }
-
-        disablePlaceOrder();
-
-        alert(
-            "Unable to load your cart. Please return to the cart page."
-        );
+    } catch (orderErr) {
+      console.error('Order creation error:', orderErr);
+      Shopy.showToast(orderErr.message || 'Unable to create order.', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'CONTINUE TO PAYMENT →';
+      }
     }
-}
+  }
 
-
-// =====================================
-// UPDATE CHECKOUT SUMMARY
-// =====================================
-
-function updateCheckoutSummary() {
-
-    const itemCount =
-        cartItems.reduce(
-            (total, item) =>
-                total + Number(item.quantity || 0),
-            0
-        );
-
-    const countElement =
-        document.getElementById("checkoutItemCount");
-
-    const totalElement =
-        document.getElementById("checkoutTotal");
-
-    if (countElement) {
-        countElement.textContent =
-            "Items: " + itemCount;
-    }
-
-    if (totalElement) {
-        totalElement.textContent =
-            "Total: ₹" +
-            cartTotal.toLocaleString("en-IN");
-    }
-
-    if (itemCount <= 0) {
-        disablePlaceOrder();
-    } else {
-        enablePlaceOrder();
-    }
-}
-
-
-// =====================================
-// ENABLE PLACE ORDER
-// =====================================
-
-function enablePlaceOrder() {
-
-    const button =
-        document.getElementById("placeOrderButton");
-
-    if (!button) return;
-
-    button.disabled = false;
-    button.textContent = "Place Order";
-}
-
-
-// =====================================
-// DISABLE PLACE ORDER
-// =====================================
-
-function disablePlaceOrder() {
-
-    const button =
-        document.getElementById("placeOrderButton");
-
-    if (!button) return;
-
-    button.disabled = true;
-    button.textContent = "Cart is Empty";
-}
-
-
-// =====================================
-// PLACE ORDER
-// =====================================
-
-async function placeOrder(event) {
-
-    if (event) {
-        event.preventDefault();
-    }
-
-    const token = getToken();
-
-    if (!token) {
-
-        alert("Please login first.");
-
-        window.location.href =
-            "/login.html";
-
-        return;
-    }
-
-
-    if (
-        !Array.isArray(cartItems) ||
-        cartItems.length === 0
-    ) {
-
-        alert("Your cart is empty.");
-
-        return;
-    }
-
-
-    const fullName =
-        document.getElementById("fullName").value.trim();
-
-    const phone =
-        document.getElementById("phone").value.trim();
-
-    const addressLine =
-        document.getElementById("addressLine").value.trim();
-
-    const city =
-        document.getElementById("city").value.trim();
-
-    const state =
-        document.getElementById("state").value.trim();
-
-    const postalCode =
-        document.getElementById("postalCode").value.trim();
-
-    const country =
-        document.getElementById("country").value.trim();
-
-
-    // =====================================
-    // VALIDATION
-    // =====================================
-
-    if (!fullName) {
-        alert("Please enter your full name.");
-        return;
-    }
-
-    if (!/^[0-9]{10}$/.test(phone)) {
-        alert("Please enter a valid 10-digit phone number.");
-        return;
-    }
-
-    if (!addressLine) {
-        alert("Please enter your address.");
-        return;
-    }
-
-    if (!city) {
-        alert("Please enter your city.");
-        return;
-    }
-
-    if (!state) {
-        alert("Please enter your state.");
-        return;
-    }
-
-    if (!/^[0-9]{6}$/.test(postalCode)) {
-        alert("Please enter a valid 6-digit postal code.");
-        return;
-    }
-
-    if (!country) {
-        alert("Please enter your country.");
-        return;
-    }
-
-
-    const button =
-        document.getElementById("placeOrderButton");
-
-    if (button) {
-
-        button.disabled = true;
-
-        button.textContent =
-            "Processing...";
-    }
-
-
-    try {
-
-        // =====================================
-        // SAVE ADDRESS
-        // =====================================
-
-        const addressResponse =
-            await fetch(
-                "/api/addresses",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-
-                        "Authorization":
-                            "Bearer " + token
-                    },
-
-                    body: JSON.stringify({
-                        fullName,
-                        phone,
-                        addressLine,
-                        city,
-                        state,
-                        postalCode,
-                        country
-                    })
-                }
-            );
-
-
-        if (addressResponse.status === 401) {
-
-            handleUnauthorized();
-
-            return;
-        }
-
-
-        if (!addressResponse.ok) {
-
-            const errorText =
-                await addressResponse.text();
-
-            throw new Error(
-                errorText ||
-                "Unable to save address."
-            );
-        }
-
-
-        const address =
-            await addressResponse.json();
-
-
-        const addressId =
-            address.id;
-
-
-        if (!addressId) {
-
-            throw new Error(
-                "Address was saved but no address ID was returned."
-            );
-        }
-
-
-        // =====================================
-        // CREATE ORDER
-        // =====================================
-
-        const orderResponse =
-            await fetch(
-                `/api/orders/create?addressId=${addressId}`,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Authorization":
-                            "Bearer " + token
-                    }
-                }
-            );
-
-
-        if (orderResponse.status === 401) {
-
-            handleUnauthorized();
-
-            return;
-        }
-
-
-        if (!orderResponse.ok) {
-
-            const errorText =
-                await orderResponse.text();
-
-            throw new Error(
-                errorText ||
-                "Unable to create order."
-            );
-        }
-
-
-        const order =
-            await orderResponse.json();
-
-
-        const orderId =
-            order.id ||
-            order.orderId;
-
-
-        if (!orderId) {
-
-            throw new Error(
-                "Order was created but no order ID was returned."
-            );
-        }
-
-
-        // =====================================
-        // IMPORTANT:
-        // SAVE CURRENT ORDER ID
-        // =====================================
-
-        localStorage.setItem(
-            "currentOrderId",
-            String(orderId)
-        );
-
-
-        // =====================================
-        // GO TO PAYMENT
-        // =====================================
-
-        window.location.href =
-            `/payment.html?orderId=${orderId}`;
-
-
-    } catch (error) {
-
-        console.error(
-            "Place order error:",
-            error
-        );
-
-
-        alert(
-            error.message ||
-            "Unable to place order."
-        );
-
-
-        enablePlaceOrder();
-    }
-}
-
-
-// =====================================
-// UNAUTHORIZED
-// =====================================
-
-function handleUnauthorized() {
-
-    localStorage.removeItem("token");
-
-    localStorage.removeItem("user");
-
-    localStorage.removeItem(
-        "currentOrderId"
-    );
-
-    alert(
-        "Your login session has expired. Please login again."
-    );
-
-    window.location.href =
-        "/login.html";
-}
-
-
-// =====================================
-// PAGE START
-// =====================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-
-        const form =
-            document.getElementById(
-                "checkoutForm"
-            );
-
-        if (form) {
-
-            form.addEventListener(
-                "submit",
-                placeOrder
-            );
-        }
-
-        loadCheckoutCart();
-    }
-);
+})();

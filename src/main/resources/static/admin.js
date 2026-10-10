@@ -1,1840 +1,947 @@
-const ADMIN_API = "/api/admin";
+/**
+ * SHOPY — Admin Console JavaScript
+ * Connects directly to Spring Boot backend APIs with JWT authentication.
+ */
 
 let allProducts = [];
 let filteredProducts = [];
-
+let allCategories = [];
+let allOrders = [];
+let filteredOrders = [];
+let allUsers = [];
+let filteredUsers = [];
 
 // ======================================================
-// PAGE LOAD
+// PAGE INITIALIZATION
 // ======================================================
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
+    if (!checkAdminAccess()) return;
 
-    checkAdminAccess();
-
-    loadDashboardStats();
-    loadProducts();
+    // Load initial data
+    await loadCategories();
+    await loadDashboardStats();
+    await loadProducts();
+    await loadOrders();
+    await loadUsers();
+    loadInventory();
 
     setupProductForm();
     setupCategoryForm();
-
-    setupOrderSearch();
-    setupUserSearch();
-
 });
 
-
 // ======================================================
-// ADMIN ACCESS
+// ADMIN ACCESS VERIFICATION
 // ======================================================
 
 function checkAdminAccess() {
+    const token = Shopy.getToken();
+    const user = Shopy.getUser();
 
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
-
-    if (!token || !userData) {
-        window.location.href = "/login.html";
-        return;
+    if (!token || !user) {
+        window.location.href = "/login.html?redirect=" + encodeURIComponent(window.location.pathname);
+        return false;
     }
 
-    try {
-
-        const user = JSON.parse(userData);
-
-        if (user.role !== "ADMIN") {
-
-            alert("Access denied. Admin account required.");
-
-            window.location.href = "/";
-
-            return;
+    if (user.role !== "ADMIN") {
+        if (typeof Shopy.toast === "function") {
+            Shopy.toast("Access denied: Administrative privileges required", "error");
+        } else {
+            alert("Access denied: Administrative privileges required");
         }
-
-        const adminName =
-            document.getElementById("adminName");
-
-        if (adminName) {
-
-            adminName.textContent =
-                user.name ||
-                user.username ||
-                "Administrator";
-
-        }
-
-    } catch (error) {
-
-        console.error("Invalid user data:", error);
-
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-
-        window.location.href = "/login.html";
+        window.location.href = "/index.html";
+        return false;
     }
+
+    const adminNameEl = document.getElementById("adminName");
+    const adminAvatarEl = document.getElementById("adminAvatar");
+
+    if (adminNameEl) {
+        adminNameEl.textContent = user.name || user.username || "Administrator";
+    }
+    if (adminAvatarEl) {
+        const initial = (user.name || user.username || "A").charAt(0).toUpperCase();
+        adminAvatarEl.textContent = initial;
+    }
+
+    return true;
 }
 
-
-// ======================================================
-// AUTH HEADERS
-// ======================================================
-
 function getAuthHeaders() {
-
-    const token = localStorage.getItem("token");
-
+    const token = Shopy.getToken();
     return {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + token
     };
 }
 
-
 // ======================================================
-// SIDEBAR
+// NAVIGATION & SIDEBAR
 // ======================================================
 
 function toggleSidebar() {
-
-    const sidebar =
-        document.getElementById("sidebar");
-
-    if (sidebar) {
-        sidebar.classList.toggle("open");
-    }
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.classList.toggle("open");
 }
 
+function showSection(sectionName, clickedButton = null) {
+    document.querySelectorAll(".admin-section").forEach(s => s.classList.remove("active-section"));
 
-// ======================================================
-// SECTION NAVIGATION
-// ======================================================
+    const targetSection = document.getElementById(sectionName);
+    if (targetSection) targetSection.classList.add("active-section");
 
-function showSection(
-    sectionName,
-    clickedButton = null
-) {
-
-    const sections =
-        document.querySelectorAll(".admin-section");
-
-    sections.forEach(function (section) {
-
-        section.classList.remove(
-            "active-section"
-        );
-
-    });
-
-    const selectedSection =
-        document.getElementById(sectionName);
-
-    if (selectedSection) {
-
-        selectedSection.classList.add(
-            "active-section"
-        );
-
-    }
-
-    const navButtons =
-        document.querySelectorAll(".nav-item");
-
-    navButtons.forEach(function (button) {
-
-        button.classList.remove("active");
-
-    });
-
+    document.querySelectorAll(".sidebar-nav .nav-item").forEach(btn => btn.classList.remove("active"));
     if (clickedButton) {
-
         clickedButton.classList.add("active");
-
+    } else {
+        const btn = document.querySelector(`.sidebar-nav .nav-item[onclick*="'${sectionName}'"]`);
+        if (btn) btn.classList.add("active");
     }
 
     const titles = {
-
-        dashboard: "Admin Dashboard",
-        products: "Products",
-        categories: "Categories",
-        orders: "Orders",
-        users: "Users",
-        inventory: "Inventory"
-
+        dashboard: "Dashboard Overview",
+        products: "Product Catalog",
+        categories: "Taxonomy & Categories",
+        orders: "Customer Orders",
+        users: "Customer Accounts",
+        inventory: "Inventory Control"
     };
 
-    const pageTitle =
-        document.getElementById("pageTitle");
-
+    const pageTitle = document.getElementById("pageTitle");
     if (pageTitle) {
-
-        pageTitle.textContent =
-            titles[sectionName] ||
-            "Admin Dashboard";
-
+        pageTitle.textContent = titles[sectionName] || "Admin Console";
     }
 
-    const sidebar =
-        document.getElementById("sidebar");
-
-    if (sidebar) {
-
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar && window.innerWidth <= 840) {
         sidebar.classList.remove("open");
-
     }
 
-    if (sectionName === "inventory") {
-
-        loadInventory();
-
-    }
-
+    if (sectionName === "inventory") loadInventory();
+    if (sectionName === "orders") loadOrders();
+    if (sectionName === "users") loadUsers();
+    if (sectionName === "categories") loadCategories();
+    if (sectionName === "products") loadProducts();
 }
 
+function goToStore() {
+    window.location.href = "/index.html";
+}
+
+function logoutAdmin() {
+    Shopy.logout();
+    window.location.href = "/login.html";
+}
 
 // ======================================================
-// DASHBOARD STATISTICS
+// DASHBOARD METRICS
 // ======================================================
 
 async function loadDashboardStats() {
-
     try {
+        const res = await fetch("/api/admin/dashboard", {
+            method: "GET",
+            headers: getAuthHeaders()
+        });
 
-        const response =
-            await fetch(
-                `${ADMIN_API}/stats`,
-                {
-                    method: "GET",
-                    headers: getAuthHeaders()
-                }
-            );
-
-        if (
-            response.status === 401 ||
-            response.status === 403
-        ) {
-
-            console.error(
-                "Admin statistics access denied."
-            );
-
-            return;
+        let stats = null;
+        if (res.ok) {
+            stats = await res.json();
+        } else {
+            // Fallback to /api/admin/stats
+            const fallbackRes = await fetch("/api/admin/stats", {
+                method: "GET",
+                headers: getAuthHeaders()
+            });
+            if (fallbackRes.ok) stats = await fallbackRes.json();
         }
 
-        if (!response.ok) {
+        if (stats) {
+            const totalProdEl = document.getElementById("totalProducts");
+            const totalUsersEl = document.getElementById("totalUsers");
+            const totalOrdersEl = document.getElementById("totalOrders");
+            const totalRevEl = document.getElementById("totalRevenue");
 
-            throw new Error(
-                "Failed to load dashboard statistics."
-            );
-
+            if (totalProdEl) totalProdEl.textContent = stats.totalProducts ?? 0;
+            if (totalUsersEl) totalUsersEl.textContent = stats.totalUsers ?? 0;
+            if (totalOrdersEl) totalOrdersEl.textContent = stats.totalOrders ?? 0;
+            if (totalRevEl) {
+                totalRevEl.textContent = Shopy.formatPrice(stats.totalRevenue || 0);
+            }
         }
-
-        const stats =
-            await response.json();
-
-        const totalProducts =
-            document.getElementById(
-                "totalProducts"
-            );
-
-        const totalUsers =
-            document.getElementById(
-                "totalUsers"
-            );
-
-        const totalOrders =
-            document.getElementById(
-                "totalOrders"
-            );
-
-        const totalRevenue =
-            document.getElementById(
-                "totalRevenue"
-            );
-
-        if (totalProducts) {
-
-            totalProducts.textContent =
-                stats.totalProducts ?? 0;
-
-        }
-
-        if (totalUsers) {
-
-            totalUsers.textContent =
-                stats.totalUsers ?? 0;
-
-        }
-
-        if (totalOrders) {
-
-            totalOrders.textContent =
-                stats.totalOrders ?? 0;
-
-        }
-
-        if (totalRevenue) {
-
-            totalRevenue.textContent =
-                "₹" +
-                Number(
-                    stats.totalRevenue ?? 0
-                ).toLocaleString("en-IN");
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Dashboard statistics error:",
-            error
-        );
-
+    } catch (err) {
+        console.error("Dashboard stats error:", err);
     }
-
 }
 
-
-// ======================================================
-// REFRESH DASHBOARD
-// ======================================================
-
-function refreshDashboard() {
-
-    loadDashboardStats();
-    loadProducts();
-
+async function refreshDashboard() {
+    await loadDashboardStats();
+    await loadProducts();
+    await loadOrders();
+    loadInventory();
+    Shopy.toast("Dashboard data refreshed", "info");
 }
 
-
 // ======================================================
-// LOAD PRODUCTS
+// PRODUCTS MANAGEMENT
 // ======================================================
 
 async function loadProducts() {
-
     try {
+        const res = await fetch("/api/products?page=0&size=150&sortBy=id&direction=desc", {
+            headers: getAuthHeaders()
+        });
 
-        const response =
-            await fetch(
-                "/api/products?page=0&size=100&sortBy=id&direction=desc",
-                {
-                    method: "GET",
-                    headers: getAuthHeaders()
-                }
-            );
+        if (!res.ok) throw new Error("Failed to load products");
 
-        if (!response.ok) {
+        const data = await res.json();
+        allProducts = data.content || (Array.isArray(data) ? data : []);
+        filteredProducts = [...allProducts];
 
-            throw new Error(
-                "Failed to load products."
-            );
-
+        renderProducts(filteredProducts);
+        renderLowStockAlerts(allProducts);
+        loadInventory();
+    } catch (err) {
+        console.error("Error loading products:", err);
+        const tbody = document.getElementById("productsTable");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-table">Error loading products: ${Shopy.escapeHtml(err.message)}</td></tr>`;
         }
-
-        const data =
-            await response.json();
-
-        allProducts =
-            data.content || [];
-
-        filteredProducts =
-            [...allProducts];
-
-        renderProducts(
-            filteredProducts
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Products loading error:",
-            error
-        );
-
     }
-
 }
-
-
-// ======================================================
-// RENDER PRODUCTS
-// ======================================================
 
 function renderProducts(products) {
+    const tbody = document.getElementById("productsTable");
+    if (!tbody) return;
 
-    const tableBody =
-        document.getElementById(
-            "productsTable"
-        );
-
-    if (!tableBody) {
+    if (!products || products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-table">No matching products found.</td></tr>`;
         return;
     }
 
-    tableBody.innerHTML = "";
-
-    if (products.length === 0) {
-
-        tableBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="7"
-                    class="empty-table"
-                >
-
-                    No products found.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-    }
-
-    products.forEach(function (product) {
-
-        const row =
-            document.createElement("tr");
-
-        const categoryName =
-            product.category &&
-            product.category.name
-                ? product.category.name
-                : "-";
-
-        const stock =
-            Number(product.stock || 0);
-
-        let stockClass = "";
-        let stockText = "";
-
+    tbody.innerHTML = products.map(p => {
+        const stock = Number(p.stock || 0);
+        let stockBadge = "";
         if (stock === 0) {
-
-            stockClass = "stock-out";
-            stockText = "Out of Stock";
-
+            stockBadge = `<span class="stock-out">Out of stock (0)</span>`;
         } else if (stock <= 5) {
-
-            stockClass = "stock-low";
-            stockText = `${stock} - Low`;
-
+            stockBadge = `<span class="stock-low">Low: ${stock} units</span>`;
         } else {
-
-            stockClass = "stock-good";
-            stockText = `${stock} - In Stock`;
-
+            stockBadge = `<span class="stock-good">${stock} in stock</span>`;
         }
 
-        row.innerHTML = `
+        const categoryName = p.category?.name || "Unassigned";
+        const img = p.imageUrl ? `<img src="${Shopy.escapeHtml(p.imageUrl)}" alt="${Shopy.escapeHtml(p.name)}" onerror="this.style.display='none'">` : "";
 
-            <td>
-                ${product.id ?? "-"}
-            </td>
-
-            <td>
-
-                <div class="admin-product-name">
-
-                    ${
-                        product.imageUrl
-                        ?
-                        `
-                        <img
-                            src="${escapeHtml(
-                                product.imageUrl
-                            )}"
-                            alt="${escapeHtml(
-                                product.name ||
-                                "Product"
-                            )}"
-                            onerror="
-                                this.style.display='none'
-                            "
-                        >
-                        `
-                        :
-                        ""
-                    }
-
-                    <div>
-
+        return `
+            <tr>
+                <td>#${p.id}</td>
+                <td>
+                    <div class="admin-product-name">
+                        ${img}
                         <div>
-                            ${escapeHtml(
-                                product.name ||
-                                "-"
-                            )}
+                            <strong>${Shopy.escapeHtml(p.name)}</strong>
+                            <button type="button" class="mobile-edit-button" onclick="editProduct(${p.id})">Edit</button>
                         </div>
-
-                        <button
-                            type="button"
-                            class="mobile-edit-button"
-                            onclick="
-                                editProduct(
-                                    ${product.id}
-                                )
-                            "
-                        >
-                            Edit Product
-                        </button>
-
                     </div>
-
-                </div>
-
-            </td>
-
-            <td>
-                ${escapeHtml(
-                    product.brand || "-"
-                )}
-            </td>
-
-            <td>
-                ${escapeHtml(
-                    categoryName
-                )}
-            </td>
-
-            <td>
-
-                ₹${Number(
-                    product.price || 0
-                ).toLocaleString("en-IN")}
-
-            </td>
-
-            <td>
-
-                <span
-                    class="${stockClass}"
-                >
-
-                    ${stockText}
-
-                </span>
-
-            </td>
-
-            <td>
-
-                <button
-                    type="button"
-                    onclick="
-                        editProduct(
-                            ${product.id}
-                        )
-                    "
-                >
-                    Edit
-                </button>
-
-                <button
-                    type="button"
-                    onclick="
-                        deleteProduct(
-                            ${product.id}
-                        )
-                    "
-                >
-                    Delete
-                </button>
-
-            </td>
-
+                </td>
+                <td>${Shopy.escapeHtml(p.brand || "—")}</td>
+                <td><span style="font-size:12px; color:var(--admin-text-muted);">${Shopy.escapeHtml(categoryName)}</span></td>
+                <td><strong>${Shopy.formatPrice(p.price || 0)}</strong></td>
+                <td>${stockBadge}</td>
+                <td>
+                    <button type="button" onclick="editProduct(${p.id})">Edit</button>
+                    <button type="button" class="btn-danger-sm" onclick="deleteProduct(${p.id})">Delete</button>
+                </td>
+            </tr>
         `;
-
-        tableBody.appendChild(row);
-
-    });
-
+    }).join("");
 }
 
+function renderLowStockAlerts(products) {
+    const container = document.getElementById("lowStockList");
+    if (!container) return;
 
-// ======================================================
-// SEARCH
-// ======================================================
+    const lowStockItems = products.filter(p => Number(p.stock || 0) <= 5);
 
-function searchProducts() {
+    if (lowStockItems.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span>✓</span>
+                <p>All catalog products are adequately stocked.</p>
+            </div>
+        `;
+        return;
+    }
 
-    applyProductFilters();
-
+    container.innerHTML = lowStockItems.slice(0, 5).map(p => {
+        const stock = Number(p.stock || 0);
+        const tag = stock === 0 
+            ? `<span style="color:var(--admin-danger); font-weight:700;">OUT OF STOCK</span>` 
+            : `<span style="color:#B45309; font-weight:600;">${stock} left</span>`;
+        return `
+            <div class="low-stock-item">
+                <div>
+                    <strong>${Shopy.escapeHtml(p.name)}</strong>
+                    <span>${Shopy.escapeHtml(p.brand || "SHOPY")}</span>
+                </div>
+                <div style="text-align:right;">
+                    ${tag}
+                    <div style="margin-top:4px;">
+                        <button type="button" style="font-size:11px; padding:2px 8px;" onclick="editProduct(${p.id})">Restock</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
 }
 
-
-function filterProducts() {
-
-    applyProductFilters();
-
-}
-
-
-function sortProducts() {
-
-    applyProductFilters();
-
-}
-
-
-// ======================================================
-// FILTER + SEARCH + SORT
-// ======================================================
+function searchProducts() { applyProductFilters(); }
+function filterProducts() { applyProductFilters(); }
+function sortProducts() { applyProductFilters(); }
 
 function applyProductFilters() {
+    const searchVal = (document.getElementById("productSearch")?.value || "").toLowerCase().trim();
+    const catVal = document.getElementById("productCategoryFilter")?.value || "";
+    const sortVal = document.getElementById("productSort")?.value || "id";
 
-    const searchInput =
-        document.getElementById(
-            "productSearch"
-        );
+    filteredProducts = allProducts.filter(p => {
+        const name = (p.name || "").toLowerCase();
+        const brand = (p.brand || "").toLowerCase();
+        const catName = p.category?.name || "";
 
-    const categoryFilter =
-        document.getElementById(
-            "productCategoryFilter"
-        );
+        const matchSearch = !searchVal || name.includes(searchVal) || brand.includes(searchVal);
+        const matchCategory = !catVal || catName === catVal;
 
-    const sortSelect =
-        document.getElementById(
-            "productSort"
-        );
+        return matchSearch && matchCategory;
+    });
 
-    const keyword =
-        searchInput
-            ? searchInput.value
-                .toLowerCase()
-                .trim()
-            : "";
-
-    const category =
-        categoryFilter
-            ? categoryFilter.value
-            : "";
-
-    filteredProducts =
-        allProducts.filter(function (product) {
-
-            const name =
-                (product.name || "")
-                    .toLowerCase();
-
-            const brand =
-                (product.brand || "")
-                    .toLowerCase();
-
-            const productCategory =
-                product.category &&
-                product.category.name
-                    ? product.category.name
-                    : "";
-
-            const matchesSearch =
-                !keyword ||
-                name.includes(keyword) ||
-                brand.includes(keyword);
-
-            const matchesCategory =
-                !category ||
-                productCategory === category;
-
-            return (
-                matchesSearch &&
-                matchesCategory
-            );
-
-        });
-
-    const sortValue =
-        sortSelect
-            ? sortSelect.value
-            : "id";
-
-    if (sortValue === "name") {
-
-        filteredProducts.sort(
-            function (a, b) {
-
-                return (a.name || "")
-                    .localeCompare(
-                        b.name || ""
-                    );
-
-            }
-        );
-
+    if (sortVal === "name") {
+        filteredProducts.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    } else if (sortVal === "price-low") {
+        filteredProducts.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+    } else if (sortVal === "price-high") {
+        filteredProducts.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
+    } else if (sortVal === "stock-low") {
+        filteredProducts.sort((a, b) => Number(a.stock || 0) - Number(b.stock || 0));
+    } else {
+        filteredProducts.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
     }
 
-    else if (sortValue === "price-low") {
-
-        filteredProducts.sort(
-            function (a, b) {
-
-                return Number(
-                    a.price || 0
-                ) -
-                Number(
-                    b.price || 0
-                );
-
-            }
-        );
-
-    }
-
-    else if (sortValue === "price-high") {
-
-        filteredProducts.sort(
-            function (a, b) {
-
-                return Number(
-                    b.price || 0
-                ) -
-                Number(
-                    a.price || 0
-                );
-
-            }
-        );
-
-    }
-
-    else if (sortValue === "stock-low") {
-
-        filteredProducts.sort(
-            function (a, b) {
-
-                return Number(
-                    a.stock || 0
-                ) -
-                Number(
-                    b.stock || 0
-                );
-
-            }
-        );
-
-    }
-
-    else if (sortValue === "stock-high") {
-
-        filteredProducts.sort(
-            function (a, b) {
-
-                return Number(
-                    b.stock || 0
-                ) -
-                Number(
-                    a.stock || 0
-                );
-
-            }
-        );
-
-    }
-
-    else {
-
-        filteredProducts.sort(
-            function (a, b) {
-
-                return Number(
-                    b.id || 0
-                ) -
-                Number(
-                    a.id || 0
-                );
-
-            }
-        );
-
-    }
-
-    renderProducts(
-        filteredProducts
-    );
-
+    renderProducts(filteredProducts);
 }
 
-
-// ======================================================
-// OPEN ADD PRODUCT MODAL
-// ======================================================
-
+// Modal handling for Product
 function openAddProductModal() {
+    const modal = document.getElementById("productModal");
+    const form = document.getElementById("productForm");
+    if (form) form.reset();
 
-    const modal =
-        document.getElementById(
-            "productModal"
-        );
+    const editId = document.getElementById("editingProductId");
+    if (editId) editId.value = "";
 
-    const form =
-        document.getElementById(
-            "productForm"
-        );
+    const title = document.getElementById("productModalTitle");
+    if (title) title.textContent = "Add Product";
 
-    if (form) {
+    const submitBtn = document.getElementById("productSubmitButton");
+    if (submitBtn) submitBtn.textContent = "Save Product";
 
-        form.reset();
+    populateCategoryDropdown();
 
-    }
-
-    const editingId =
-        document.getElementById(
-            "editingProductId"
-        );
-
-    if (editingId) {
-
-        editingId.value = "";
-
-    }
-
-    const title =
-        document.getElementById(
-            "productModalTitle"
-        );
-
-    if (title) {
-
-        title.textContent =
-            "Add Product";
-
-    }
-
-    const description =
-        document.getElementById(
-            "productModalDescription"
-        );
-
-    if (description) {
-
-        description.textContent =
-            "Create a new Shopora product.";
-
-    }
-
-    const submitButton =
-        document.getElementById(
-            "productSubmitButton"
-        );
-
-    if (submitButton) {
-
-        submitButton.textContent =
-            "Add Product";
-
-    }
-
-    if (modal) {
-
-        /*
-         * IMPORTANT:
-         * admin.css uses .show
-         */
-        modal.classList.add("show");
-
-    }
-
+    if (modal) modal.classList.add("show");
 }
-
-
-// ======================================================
-// CLOSE PRODUCT MODAL
-// ======================================================
 
 function closeProductModal() {
-
-    const modal =
-        document.getElementById(
-            "productModal"
-        );
-
-    if (modal) {
-
-        modal.classList.remove("show");
-
-    }
-
+    const modal = document.getElementById("productModal");
+    if (modal) modal.classList.remove("show");
 }
-
-
-// ======================================================
-// PRODUCT FORM
-// ======================================================
-
-function setupProductForm() {
-
-    const form =
-        document.getElementById(
-            "productForm"
-        );
-
-    if (!form) {
-        return;
-    }
-
-    form.addEventListener(
-        "submit",
-        saveProduct
-    );
-
-}
-
-
-// ======================================================
-// SAVE PRODUCT
-// ======================================================
-
-async function saveProduct(event) {
-
-    event.preventDefault();
-
-    const editingElement =
-        document.getElementById(
-            "editingProductId"
-        );
-
-    const editingId =
-        editingElement
-            ? editingElement.value
-            : "";
-
-    const name =
-        document.getElementById(
-            "productName"
-        ).value.trim();
-
-    const brand =
-        document.getElementById(
-            "productBrand"
-        ).value.trim();
-
-    const price =
-        document.getElementById(
-            "productPrice"
-        ).value;
-
-    const stock =
-        document.getElementById(
-            "productStock"
-        ).value;
-
-    const imageUrl =
-        document.getElementById(
-            "productImage"
-        ).value.trim();
-
-    const description =
-        document.getElementById(
-            "productDescription"
-        ).value.trim();
-
-    const categoryId =
-        document.getElementById(
-            "productCategory"
-        ).value;
-
-    if (
-        !name ||
-        !brand ||
-        price === "" ||
-        stock === "" ||
-        !categoryId
-    ) {
-
-        alert(
-            "Please fill all required product fields."
-        );
-
-        return;
-    }
-
-    if (Number(price) < 0) {
-
-        alert(
-            "Price cannot be negative."
-        );
-
-        return;
-    }
-
-    if (Number(stock) < 0) {
-
-        alert(
-            "Stock cannot be negative."
-        );
-
-        return;
-    }
-
-    const product = {
-
-        name: name,
-
-        brand: brand,
-
-        price: Number(price),
-
-        stock: Number(stock),
-
-        imageUrl: imageUrl,
-
-        description: description,
-
-        category: {
-            id: Number(categoryId)
-        }
-
-    };
-
-    try {
-
-        let response;
-
-        if (editingId) {
-
-            response =
-                await fetch(
-                    `/api/products/${editingId}`,
-                    {
-                        method: "PUT",
-                        headers:
-                            getAuthHeaders(),
-                        body:
-                            JSON.stringify(
-                                product
-                            )
-                    }
-                );
-
-        } else {
-
-            response =
-                await fetch(
-                    "/api/products",
-                    {
-                        method: "POST",
-                        headers:
-                            getAuthHeaders(),
-                        body:
-                            JSON.stringify(
-                                product
-                            )
-                    }
-                );
-
-        }
-
-        if (!response.ok) {
-
-            const message =
-                await response.text();
-
-            throw new Error(
-                message ||
-                "Failed to save product."
-            );
-
-        }
-
-        if (editingId) {
-
-            alert(
-                "Product updated successfully."
-            );
-
-        } else {
-
-            alert(
-                "Product added successfully."
-            );
-
-        }
-
-        closeProductModal();
-
-        await loadProducts();
-
-        await loadDashboardStats();
-
-    } catch (error) {
-
-        console.error(
-            "Product save error:",
-            error
-        );
-
-        alert(
-            "Failed to save product."
-        );
-
-    }
-
-}
-
-
-// ======================================================
-// EDIT PRODUCT
-// ======================================================
 
 function editProduct(id) {
-
-    const product =
-        allProducts.find(
-            function (item) {
-
-                return Number(item.id) ===
-                    Number(id);
-
-            }
-        );
-
+    const product = allProducts.find(p => Number(p.id) === Number(id));
     if (!product) {
-
-        alert(
-            "Product information not found."
-        );
-
+        Shopy.toast("Product record not found", "error");
         return;
     }
 
-    const editingId =
-        document.getElementById(
-            "editingProductId"
-        );
+    populateCategoryDropdown();
 
-    if (editingId) {
+    document.getElementById("editingProductId").value = product.id;
+    document.getElementById("productName").value = product.name || "";
+    document.getElementById("productBrand").value = product.brand || "";
+    document.getElementById("productPrice").value = product.price ?? "";
+    document.getElementById("productStock").value = product.stock ?? "";
+    document.getElementById("productImage").value = product.imageUrl || "";
+    document.getElementById("productDescription").value = product.description || "";
 
-        editingId.value =
-            product.id;
-
+    const catSelect = document.getElementById("productCategory");
+    if (catSelect && product.category?.id) {
+        catSelect.value = product.category.id;
     }
 
-    const name =
-        document.getElementById(
-            "productName"
-        );
+    document.getElementById("productModalTitle").textContent = "Edit Product #" + product.id;
+    document.getElementById("productSubmitButton").textContent = "Update Product";
 
-    if (name) {
-
-        name.value =
-            product.name || "";
-
-    }
-
-    const brand =
-        document.getElementById(
-            "productBrand"
-        );
-
-    if (brand) {
-
-        brand.value =
-            product.brand || "";
-
-    }
-
-    const price =
-        document.getElementById(
-            "productPrice"
-        );
-
-    if (price) {
-
-        price.value =
-            product.price ?? "";
-
-    }
-
-    const stock =
-        document.getElementById(
-            "productStock"
-        );
-
-    if (stock) {
-
-        stock.value =
-            product.stock ?? "";
-
-    }
-
-    const image =
-        document.getElementById(
-            "productImage"
-        );
-
-    if (image) {
-
-        image.value =
-            product.imageUrl || "";
-
-    }
-
-    const description =
-        document.getElementById(
-            "productDescription"
-        );
-
-    if (description) {
-
-        description.value =
-            product.description || "";
-
-    }
-
-    const category =
-        document.getElementById(
-            "productCategory"
-        );
-
-    if (category) {
-
-        category.value =
-            product.category
-                ? product.category.id
-                : "";
-
-    }
-
-    const title =
-        document.getElementById(
-            "productModalTitle"
-        );
-
-    if (title) {
-
-        title.textContent =
-            "Edit Product";
-
-    }
-
-    const modalDescription =
-        document.getElementById(
-            "productModalDescription"
-        );
-
-    if (modalDescription) {
-
-        modalDescription.textContent =
-            "Update this Shopora product.";
-
-    }
-
-    const submitButton =
-        document.getElementById(
-            "productSubmitButton"
-        );
-
-    if (submitButton) {
-
-        submitButton.textContent =
-            "Save Changes";
-
-    }
-
-    const modal =
-        document.getElementById(
-            "productModal"
-        );
-
-    if (modal) {
-
-        modal.classList.add("show");
-
-        modal.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
-
-    }
-
+    const modal = document.getElementById("productModal");
+    if (modal) modal.classList.add("show");
 }
 
+function setupProductForm() {
+    const form = document.getElementById("productForm");
+    if (!form) return;
 
-// ======================================================
-// DELETE PRODUCT
-// ======================================================
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const editId = document.getElementById("editingProductId").value.trim();
+        const name = document.getElementById("productName").value.trim();
+        const brand = document.getElementById("productBrand").value.trim();
+        const price = parseFloat(document.getElementById("productPrice").value);
+        const stock = parseInt(document.getElementById("productStock").value, 10);
+        const imageUrl = document.getElementById("productImage").value.trim();
+        const description = document.getElementById("productDescription").value.trim();
+        const categoryId = document.getElementById("productCategory").value;
+
+        if (!name || !brand || isNaN(price) || isNaN(stock) || !categoryId) {
+            Shopy.toast("Please fill in all required fields", "warning");
+            return;
+        }
+
+        const payload = {
+            name,
+            brand,
+            price,
+            stock,
+            imageUrl,
+            description,
+            category: { id: Number(categoryId) }
+        };
+
+        try {
+            const url = editId ? `/api/products/${editId}` : `/api/products`;
+            const method = editId ? "PUT" : "POST";
+
+            const res = await fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Failed to save product");
+            }
+
+            Shopy.toast(editId ? "Product updated successfully" : "Product added successfully", "success");
+            closeProductModal();
+            await loadProducts();
+            await loadDashboardStats();
+        } catch (err) {
+            console.error("Save product error:", err);
+            Shopy.toast("Failed to save product: " + err.message, "error");
+        }
+    });
+}
 
 async function deleteProduct(id) {
+    const product = allProducts.find(p => Number(p.id) === Number(id));
+    const confirmName = product ? `"${product.name}"` : "this product";
 
-    const product =
-        allProducts.find(
-            function (item) {
+    if (!confirm(`Are you sure you want to permanently delete ${confirmName}?`)) return;
 
-                return Number(item.id) ===
-                    Number(id);
+    try {
+        const res = await fetch(`/api/products/${id}`, {
+            method: "DELETE",
+            headers: getAuthHeaders()
+        });
 
-            }
-        );
+        if (!res.ok) throw new Error("Failed to delete product from database");
 
-    const productName =
-        product
-            ? product.name
-            : "this product";
+        Shopy.toast("Product deleted successfully", "success");
+        await loadProducts();
+        await loadDashboardStats();
+    } catch (err) {
+        console.error("Delete product error:", err);
+        Shopy.toast("Delete failed: " + err.message, "error");
+    }
+}
 
-    const confirmed =
-        confirm(
-            `Are you sure you want to delete "${productName}"?`
-        );
+// ======================================================
+// CATEGORIES MANAGEMENT
+// ======================================================
 
-    if (!confirmed) {
+async function loadCategories() {
+    try {
+        const res = await fetch("/api/categories", {
+            headers: getAuthHeaders()
+        });
+
+        if (!res.ok) throw new Error("Failed to load categories");
+
+        allCategories = await res.json();
+        renderCategories(allCategories);
+        populateCategoryFilters(allCategories);
+        populateCategoryDropdown();
+    } catch (err) {
+        console.error("Categories error:", err);
+    }
+}
+
+function renderCategories(categories) {
+    const grid = document.getElementById("categoryGrid");
+    if (!grid) return;
+
+    if (!categories || categories.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><p>No categories defined.</p></div>`;
         return;
     }
 
-    try {
-
-        const response =
-            await fetch(
-                `/api/products/${id}`,
-                {
-                    method: "DELETE",
-                    headers:
-                        getAuthHeaders()
-                }
-            );
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Failed to delete product."
-            );
-
-        }
-
-        alert(
-            "Product deleted successfully."
-        );
-
-        await loadProducts();
-
-        await loadDashboardStats();
-
-    } catch (error) {
-
-        console.error(
-            "Delete product error:",
-            error
-        );
-
-        alert(
-            "Failed to delete product."
-        );
-
-    }
-
+    grid.innerHTML = categories.map(cat => `
+        <div class="category-admin-card">
+            <div>
+                <span class="cat-badge">#${cat.id}</span>
+                <h3>${Shopy.escapeHtml(cat.name)}</h3>
+                <p>${Shopy.escapeHtml(cat.description || "No description provided.")}</p>
+            </div>
+            <div class="category-actions">
+                <button type="button" onclick="editCategory(${cat.id})">Edit</button>
+                <button type="button" class="danger-outline" onclick="deleteCategory(${cat.id}, '${Shopy.escapeHtml(cat.name)}')">Delete</button>
+            </div>
+        </div>
+    `).join("");
 }
 
+function populateCategoryFilters(categories) {
+    const filterSelect = document.getElementById("productCategoryFilter");
+    if (!filterSelect) return;
 
-// ======================================================
-// CATEGORY MODAL
-// ======================================================
+    const currentVal = filterSelect.value;
+    filterSelect.innerHTML = `<option value="">All Categories</option>` + 
+        categories.map(c => `<option value="${Shopy.escapeHtml(c.name)}">${Shopy.escapeHtml(c.name)}</option>`).join("");
+    if (currentVal) filterSelect.value = currentVal;
+}
+
+function populateCategoryDropdown() {
+    const catSelect = document.getElementById("productCategory");
+    if (!catSelect) return;
+
+    const currentVal = catSelect.value;
+    catSelect.innerHTML = `<option value="">Select Category</option>` + 
+        allCategories.map(c => `<option value="${c.id}">${Shopy.escapeHtml(c.name)}</option>`).join("");
+    if (currentVal) catSelect.value = currentVal;
+}
 
 function openCategoryModal() {
+    const modal = document.getElementById("categoryModal");
+    const form = document.getElementById("categoryForm");
+    if (form) form.reset();
 
-    const modal =
-        document.getElementById(
-            "categoryModal"
-        );
+    document.getElementById("editingCategoryId").value = "";
+    document.getElementById("categoryModalTitle").textContent = "Add Category";
+    document.getElementById("categorySubmitBtn").textContent = "Save Category";
 
-    if (modal) {
-
-        modal.classList.add("show");
-
-    }
-
+    if (modal) modal.classList.add("show");
 }
-
 
 function closeCategoryModal() {
-
-    const modal =
-        document.getElementById(
-            "categoryModal"
-        );
-
-    if (modal) {
-
-        modal.classList.remove("show");
-
-    }
-
+    const modal = document.getElementById("categoryModal");
+    if (modal) modal.classList.remove("show");
 }
 
+function editCategory(id) {
+    const cat = allCategories.find(c => Number(c.id) === Number(id));
+    if (!cat) return;
 
-// ======================================================
-// CATEGORY FORM
-// ======================================================
+    document.getElementById("editingCategoryId").value = cat.id;
+    document.getElementById("categoryName").value = cat.name || "";
+    document.getElementById("categoryDescription").value = cat.description || "";
+
+    document.getElementById("categoryModalTitle").textContent = "Edit Category #" + cat.id;
+    document.getElementById("categorySubmitBtn").textContent = "Update Category";
+
+    const modal = document.getElementById("categoryModal");
+    if (modal) modal.classList.add("show");
+}
 
 function setupCategoryForm() {
+    const form = document.getElementById("categoryForm");
+    if (!form) return;
 
-    const form =
-        document.getElementById(
-            "categoryForm"
-        );
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-    if (!form) {
-        return;
-    }
+        const editId = document.getElementById("editingCategoryId").value.trim();
+        const name = document.getElementById("categoryName").value.trim();
+        const description = document.getElementById("categoryDescription").value.trim();
 
-    form.addEventListener(
-        "submit",
-        saveCategory
-    );
+        if (!name) {
+            Shopy.toast("Category name is required", "warning");
+            return;
+        }
 
+        const payload = { name, description };
+
+        try {
+            const url = editId ? `/api/categories/${editId}` : `/api/categories`;
+            const method = editId ? "PUT" : "POST";
+
+            const res = await fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) throw new Error("Failed to save category");
+
+            Shopy.toast(editId ? "Category updated" : "Category created", "success");
+            closeCategoryModal();
+            await loadCategories();
+        } catch (err) {
+            console.error("Save category error:", err);
+            Shopy.toast("Save category failed: " + err.message, "error");
+        }
+    });
 }
 
-
-async function saveCategory(event) {
-
-    event.preventDefault();
-
-    const name =
-        document.getElementById(
-            "categoryName"
-        ).value.trim();
-
-    const description =
-        document.getElementById(
-            "categoryDescription"
-        ).value.trim();
-
-    if (!name) {
-
-        alert(
-            "Category name is required."
-        );
-
-        return;
-    }
+async function deleteCategory(id, name) {
+    if (!confirm(`Are you sure you want to delete category "${name}"?`)) return;
 
     try {
+        const res = await fetch(`/api/categories/${id}`, {
+            method: "DELETE",
+            headers: getAuthHeaders()
+        });
 
-        const response =
-            await fetch(
-                "/api/categories",
-                {
-                    method: "POST",
-                    headers:
-                        getAuthHeaders(),
+        if (!res.ok) throw new Error("Failed to delete category");
 
-                    body:
-                        JSON.stringify({
-                            name:
-                                name,
-                            description:
-                                description
-                        })
-                }
-            );
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Failed to create category."
-            );
-
-        }
-
-        alert(
-            "Category created successfully."
-        );
-
-        const form =
-            document.getElementById(
-                "categoryForm"
-            );
-
-        if (form) {
-            form.reset();
-        }
-
-        closeCategoryModal();
-
-    } catch (error) {
-
-        console.error(
-            "Category error:",
-            error
-        );
-
-        alert(
-            "Failed to create category."
-        );
-
+        Shopy.toast("Category removed", "success");
+        await loadCategories();
+    } catch (err) {
+        console.error("Delete category error:", err);
+        Shopy.toast("Cannot delete category: " + err.message, "error");
     }
-
 }
 
+// ======================================================
+// ORDERS MANAGEMENT
+// ======================================================
+
+async function loadOrders() {
+    try {
+        const res = await fetch("/api/admin/orders", {
+            headers: getAuthHeaders()
+        });
+
+        if (!res.ok) throw new Error("Failed to load orders");
+
+        allOrders = await res.json();
+        // Sort descending by id
+        allOrders.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+        filteredOrders = [...allOrders];
+
+        renderOrders(filteredOrders);
+        renderRecentOrders(allOrders);
+    } catch (err) {
+        console.error("Orders error:", err);
+        const tbody = document.getElementById("ordersTable");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-table">Error loading orders: ${Shopy.escapeHtml(err.message)}</td></tr>`;
+        }
+    }
+}
+
+function renderOrders(orders) {
+    const tbody = document.getElementById("ordersTable");
+    if (!tbody) return;
+
+    if (!orders || orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-table">No orders found.</td></tr>`;
+        return;
+    }
+
+    const statuses = ["PLACED", "CONFIRMED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"];
+
+    tbody.innerHTML = orders.map(ord => {
+        const status = ord.status || "PLACED";
+        const badgeClass = `badge-${status.toLowerCase().replace(/_/g, "-")}`;
+        const dateStr = ord.orderDate ? new Date(ord.orderDate).toLocaleDateString("en-IN", {
+            day: "numeric", month: "short", year: "numeric"
+        }) : "—";
+        const destination = ord.city ? `${ord.city}, ${ord.state || ""}` : (ord.country || "India");
+
+        const options = statuses.map(s => 
+            `<option value="${s}" ${s === status ? "selected" : ""}>${s.replace(/_/g, " ")}</option>`
+        ).join("");
+
+        return `
+            <tr>
+                <td><strong>#${ord.id}</strong></td>
+                <td>
+                    <strong>${Shopy.escapeHtml(ord.customerName || ord.username || "Customer")}</strong>
+                    <div style="font-size:11.5px; color:var(--admin-text-muted);">ID: ${ord.userId || "—"}</div>
+                </td>
+                <td>${Shopy.escapeHtml(destination)}</td>
+                <td>${dateStr}</td>
+                <td><strong>${Shopy.formatPrice(ord.totalAmount || 0)}</strong></td>
+                <td><span class="badge-status ${badgeClass}">${status.replace(/_/g, " ")}</span></td>
+                <td>
+                    <select style="height:32px; font-size:12px; padding:0 8px; border-radius:4px; border:1px solid var(--admin-border);"
+                            onchange="updateOrderStatus(${ord.id}, this.value)">
+                        ${options}
+                    </select>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function renderRecentOrders(orders) {
+    const tbody = document.getElementById("recentOrders");
+    if (!tbody) return;
+
+    if (!orders || orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-table">No recent transactions.</td></tr>`;
+        return;
+    }
+
+    const recent = orders.slice(0, 5);
+    tbody.innerHTML = recent.map(ord => {
+        const status = ord.status || "PLACED";
+        const badgeClass = `badge-${status.toLowerCase().replace(/_/g, "-")}`;
+
+        return `
+            <tr>
+                <td><strong>#${ord.id}</strong></td>
+                <td>${Shopy.escapeHtml(ord.customerName || ord.username || "Customer")}</td>
+                <td><strong>${Shopy.formatPrice(ord.totalAmount || 0)}</strong></td>
+                <td><span class="badge-status ${badgeClass}">${status.replace(/_/g, " ")}</span></td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function filterOrders() {
+    const searchVal = (document.getElementById("orderSearch")?.value || "").toLowerCase().trim();
+    const statusVal = document.getElementById("orderStatusFilter")?.value || "";
+
+    filteredOrders = allOrders.filter(ord => {
+        const customer = (ord.customerName || ord.username || "").toLowerCase();
+        const city = (ord.city || "").toLowerCase();
+        const idStr = String(ord.id);
+
+        const matchSearch = !searchVal || customer.includes(searchVal) || city.includes(searchVal) || idStr.includes(searchVal);
+        const matchStatus = !statusVal || ord.status === statusVal;
+
+        return matchSearch && matchStatus;
+    });
+
+    renderOrders(filteredOrders);
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+    try {
+        const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+            method: "PUT",
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error(err || "Failed to update status");
+        }
+
+        Shopy.toast(`Order #${orderId} marked as ${newStatus}`, "success");
+        await loadOrders();
+        await loadDashboardStats();
+    } catch (err) {
+        console.error("Order status update error:", err);
+        Shopy.toast("Status update failed: " + err.message, "error");
+        await loadOrders(); // revert dropdown UI
+    }
+}
 
 // ======================================================
-// INVENTORY
+// USERS MANAGEMENT
+// ======================================================
+
+async function loadUsers() {
+    try {
+        const res = await fetch("/api/admin/users", {
+            headers: getAuthHeaders()
+        });
+
+        if (!res.ok) throw new Error("Failed to load customer list");
+
+        allUsers = await res.json();
+        filteredUsers = [...allUsers];
+
+        renderUsers(filteredUsers);
+    } catch (err) {
+        console.error("Users error:", err);
+        const tbody = document.getElementById("usersTable");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-table">Error loading users: ${Shopy.escapeHtml(err.message)}</td></tr>`;
+        }
+    }
+}
+
+function renderUsers(users) {
+    const tbody = document.getElementById("usersTable");
+    if (!tbody) return;
+
+    if (!users || users.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-table">No matching accounts found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.map(u => {
+        const isAdm = u.role === "ADMIN";
+        const roleBadge = isAdm
+            ? `<span style="background:rgba(100,31,43,0.1); color:var(--admin-primary-accent); padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">ADMIN</span>`
+            : `<span style="background:#F0EEE8; color:var(--admin-text-muted); padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600;">CUSTOMER</span>`;
+
+        return `
+            <tr>
+                <td>#${u.id}</td>
+                <td><strong>${Shopy.escapeHtml(u.name || "—")}</strong></td>
+                <td>${Shopy.escapeHtml(u.username || "—")}</td>
+                <td><a href="mailto:${Shopy.escapeHtml(u.email || "")}" style="color:inherit; text-decoration:underline;">${Shopy.escapeHtml(u.email || "—")}</a></td>
+                <td>${roleBadge}</td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function filterUsers() {
+    const searchVal = (document.getElementById("userSearch")?.value || "").toLowerCase().trim();
+
+    filteredUsers = allUsers.filter(u => {
+        const name = (u.name || "").toLowerCase();
+        const username = (u.username || "").toLowerCase();
+        const email = (u.email || "").toLowerCase();
+
+        return !searchVal || name.includes(searchVal) || username.includes(searchVal) || email.includes(searchVal);
+    });
+
+    renderUsers(filteredUsers);
+}
+
+// ======================================================
+// INVENTORY CONTROL
 // ======================================================
 
 function loadInventory() {
-
-    const inventoryTotal =
-        document.getElementById(
-            "inventoryTotal"
-        );
-
-    const inventoryLow =
-        document.getElementById(
-            "inventoryLow"
-        );
-
-    const inventoryOut =
-        document.getElementById(
-            "inventoryOut"
-        );
-
-    const inventoryTable =
-        document.getElementById(
-            "inventoryTable"
-        );
-
-    let totalItems = 0;
+    let totalStock = 0;
     let lowStock = 0;
     let outOfStock = 0;
 
-    allProducts.forEach(
-        function (product) {
+    allProducts.forEach(p => {
+        const count = Number(p.stock || 0);
+        totalStock += count;
+        if (count === 0) outOfStock++;
+        else if (count <= 5) lowStock++;
+    });
 
-            const stock =
-                Number(
-                    product.stock || 0
-                );
+    const totalEl = document.getElementById("inventoryTotal");
+    const lowEl = document.getElementById("inventoryLow");
+    const outEl = document.getElementById("inventoryOut");
 
-            totalItems += stock;
+    if (totalEl) totalEl.textContent = totalStock;
+    if (lowEl) lowEl.textContent = lowStock;
+    if (outEl) outEl.textContent = outOfStock;
 
-            if (stock === 0) {
+    renderInventoryTable(allProducts);
+}
 
-                outOfStock++;
+function renderInventoryTable(products) {
+    const tbody = document.getElementById("inventoryTable");
+    if (!tbody) return;
 
-            } else if (stock <= 5) {
-
-                lowStock++;
-
-            }
-
-        }
-    );
-
-    if (inventoryTotal) {
-
-        inventoryTotal.textContent =
-            totalItems;
-
-    }
-
-    if (inventoryLow) {
-
-        inventoryLow.textContent =
-            lowStock;
-
-    }
-
-    if (inventoryOut) {
-
-        inventoryOut.textContent =
-            outOfStock;
-
-    }
-
-    if (!inventoryTable) {
+    if (!products || products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-table">No inventory items.</td></tr>`;
         return;
     }
 
-    inventoryTable.innerHTML = "";
+    tbody.innerHTML = products.map(p => {
+        const stock = Number(p.stock || 0);
+        let statusBadge = "";
+        if (stock === 0) {
+            statusBadge = `<span class="stock-out">Out of Stock</span>`;
+        } else if (stock <= 5) {
+            statusBadge = `<span class="stock-low">Low Stock</span>`;
+        } else {
+            statusBadge = `<span class="stock-good">In Stock</span>`;
+        }
 
-    if (allProducts.length === 0) {
-
-        inventoryTable.innerHTML = `
-
+        return `
             <tr>
-
-                <td
-                    colspan="5"
-                    class="empty-table"
-                >
-                    No inventory data.
+                <td><strong>${Shopy.escapeHtml(p.name)}</strong></td>
+                <td>${Shopy.escapeHtml(p.brand || "—")}</td>
+                <td><strong>${stock} units</strong></td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div class="quick-stock-form">
+                        <input type="number" min="0" value="${stock}" id="stockInput_${p.id}">
+                        <button type="button" onclick="updateInventoryStock(${p.id})">Update</button>
+                    </div>
                 </td>
-
             </tr>
-
         `;
+    }).join("");
+}
 
+async function updateInventoryStock(productId) {
+    const input = document.getElementById(`stockInput_${productId}`);
+    if (!input) return;
+
+    const newStock = parseInt(input.value, 10);
+    if (isNaN(newStock) || newStock < 0) {
+        Shopy.toast("Please enter a valid stock value", "warning");
         return;
     }
 
-    allProducts.forEach(
-        function (product) {
+    try {
+        const res = await fetch(`/api/admin/inventory/product/${productId}?stock=${newStock}`, {
+            method: "PUT",
+            headers: getAuthHeaders()
+        });
 
-            const stock =
-                Number(
-                    product.stock || 0
-                );
+        if (!res.ok) throw new Error("Failed to update inventory count");
 
-            const status =
-                getStockStatus(stock);
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-            row.innerHTML = `
-
-                <td>
-                    ${escapeHtml(
-                        product.name || "-"
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHtml(
-                        product.brand || "-"
-                    )}
-                </td>
-
-                <td>
-                    ${stock}
-                </td>
-
-                <td>
-                    ${status}
-                </td>
-
-                <td>
-
-                    <button
-                        type="button"
-                        onclick="
-                            editProduct(
-                                ${product.id}
-                            )
-                        "
-                    >
-                        Edit
-                    </button>
-
-                </td>
-
-            `;
-
-            inventoryTable.appendChild(row);
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// STOCK STATUS
-// ======================================================
-
-function getStockStatus(stock) {
-
-    stock =
-        Number(stock || 0);
-
-    if (stock === 0) {
-
-        return "Out of Stock";
-
+        Shopy.toast(`Stock updated for item #${productId}`, "success");
+        await loadProducts();
+    } catch (err) {
+        console.error("Inventory update error:", err);
+        Shopy.toast("Failed to update stock: " + err.message, "error");
     }
-
-    if (stock <= 5) {
-
-        return "Low Stock";
-
-    }
-
-    return "In Stock";
-
 }
 
+// Global exposes for template HTML events
+window.toggleSidebar = toggleSidebar;
+window.showSection = showSection;
+window.refreshDashboard = refreshDashboard;
+window.goToStore = goToStore;
+window.logoutAdmin = logoutAdmin;
 
-// ======================================================
-// ORDER SEARCH
-// ======================================================
+window.openAddProductModal = openAddProductModal;
+window.closeProductModal = closeProductModal;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.searchProducts = searchProducts;
+window.filterProducts = filterProducts;
+window.sortProducts = sortProducts;
 
-function setupOrderSearch() {
+window.openCategoryModal = openCategoryModal;
+window.closeCategoryModal = closeCategoryModal;
+window.editCategory = editCategory;
+window.deleteCategory = deleteCategory;
 
-    const input =
-        document.getElementById(
-            "orderSearch"
-        );
+window.loadOrders = loadOrders;
+window.filterOrders = filterOrders;
+window.updateOrderStatus = updateOrderStatus;
 
-    if (!input) {
-        return;
-    }
+window.loadUsers = loadUsers;
+window.filterUsers = filterUsers;
 
-    input.addEventListener(
-        "input",
-        function () {
-
-            console.log(
-                "Order search:",
-                input.value
-            );
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// USER SEARCH
-// ======================================================
-
-function setupUserSearch() {
-
-    const input =
-        document.getElementById(
-            "userSearch"
-        );
-
-    if (!input) {
-        return;
-    }
-
-    input.addEventListener(
-        "input",
-        function () {
-
-            console.log(
-                "User search:",
-                input.value
-            );
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// GO TO STORE
-// ======================================================
-
-function goToStore() {
-
-    window.location.href =
-        "/index.html";
-
-}
-
-
-// ======================================================
-// LOGOUT
-// ======================================================
-
-function logoutAdmin() {
-
-    localStorage.removeItem(
-        "token"
-    );
-
-    localStorage.removeItem(
-        "user"
-    );
-
-    window.location.href =
-        "/login.html";
-
-}
-
-
-// ======================================================
-// ESCAPE HTML
-// ======================================================
-
-function escapeHtml(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-
-    }
-
-    return String(value)
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-// ======================================================
-// GLOBAL FUNCTIONS
-// ======================================================
-
-window.toggleSidebar =
-    toggleSidebar;
-
-window.showSection =
-    showSection;
-
-window.refreshDashboard =
-    refreshDashboard;
-
-window.openAddProductModal =
-    openAddProductModal;
-
-window.closeProductModal =
-    closeProductModal;
-
-window.editProduct =
-    editProduct;
-
-window.deleteProduct =
-    deleteProduct;
-
-window.searchProducts =
-    searchProducts;
-
-window.filterProducts =
-    filterProducts;
-
-window.sortProducts =
-    sortProducts;
-
-window.openCategoryModal =
-    openCategoryModal;
-
-window.closeCategoryModal =
-    closeCategoryModal;
-
-window.goToStore =
-    goToStore;
-
-window.logoutAdmin =
-    logoutAdmin;
+window.loadInventory = loadInventory;
+window.updateInventoryStock = updateInventoryStock;

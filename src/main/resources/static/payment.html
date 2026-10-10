@@ -1,125 +1,142 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Payment - Shopora</title>
-<link href="style.css" rel="stylesheet"/>
-<link href="/shopy-premium.css" rel="stylesheet"/></head>
-<body>
-<header class="navbar">
-<div class="logo">
-        Shopora
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SHOPY — Secure Payment</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="/shopy-brand.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="stylesheet" href="/shopy-premium.css"/>
+</head>
+<body style="background-color: var(--paper);">
+
+  <!-- Navbar -->
+  <header style="background: white; border-bottom: 1px solid var(--line); padding: 18px 36px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="/" class="site-logo">SHOPY<span class="dot">.</span></a>
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--muted); text-transform: uppercase;">
+      🔒 256-Bit Encrypted Payment
     </div>
-<nav class="nav-links">
-<a href="/">
-            Home
-        </a>
-<a href="/cart.html">
-            Cart 🛒
-        </a>
-</nav>
-</header>
-<main>
-<section class="cart-page">
-<h1>
-            Payment
-        </h1>
-<!-- ORDER SUMMARY -->
-<div class="cart-total">
-<h2>
-                Order Summary
-            </h2>
-<p id="orderId">
-                Order ID: Loading...
-            </p>
-<p id="paymentAmount" style="
-                    font-size:26px;
-                    font-weight:bold;
-                    color:#d35400;
-                    margin-top:10px;
-                ">
-                Amount: Loading...
-            </p>
-</div>
-<!-- PAYMENT METHOD -->
-<div class="cart-total">
-<h2>
-                Choose Payment Method
-            </h2>
-<p style="
-                    color:#6b7280;
-                    margin-bottom:20px;
-                ">
-                This is a simulated payment for the Shopora project.
-            </p>
-<form id="paymentForm">
-<label style="
-                        display:block;
-                        padding:15px;
-                        border:1px solid #d1d5db;
-                        border-radius:7px;
-                        margin-bottom:12px;
-                        cursor:pointer;
-                    ">
-<input checked="" name="paymentMethod" type="radio" value="UPI"/>
+  </header>
 
-                    UPI
+  <main style="max-width: 860px; margin: 0 auto; padding: 40px 24px 80px;">
+    <!-- Step Progress Indicator -->
+    <div style="display: flex; justify-content: center; align-items: center; gap: 24px; margin-bottom: 40px; font-size: 12px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;">
+      <div style="display: flex; align-items: center; gap: 8px; color: var(--muted);">
+        <span style="width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 11px;">✓</span>
+        <span>Delivery</span>
+      </div>
+      <div style="width: 40px; height: 1px; background: var(--line);"></div>
+      <div style="display: flex; align-items: center; gap: 8px; color: var(--ink);">
+        <span style="width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: white; display: grid; place-items: center; font-size: 11px;">2</span>
+        <span>Payment</span>
+      </div>
+      <div style="width: 40px; height: 1px; background: var(--line);"></div>
+      <div style="display: flex; align-items: center; gap: 8px; color: var(--muted);">
+        <span style="width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 11px;">3</span>
+        <span>Confirmation</span>
+      </div>
+    </div>
 
-                </label>
-<label style="
-                        display:block;
-                        padding:15px;
-                        border:1px solid #d1d5db;
-                        border-radius:7px;
-                        margin-bottom:12px;
-                        cursor:pointer;
-                    ">
-<input name="paymentMethod" type="radio" value="CARD"/>
+    <!-- Payment Container -->
+    <div style="background: white; border: 1px solid var(--line); border-radius: 8px; padding: 36px; box-shadow: 0 16px 40px rgba(0,0,0,0.04);">
+      
+      <!-- Order Summary Strip -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 24px; border-bottom: 1px solid var(--line); margin-bottom: 28px;">
+        <div>
+          <p class="eyebrow-label" style="margin-bottom: 4px;">ORDER VERIFICATION</p>
+          <h1 id="orderId" style="font-family: var(--serif); font-size: 26px; font-weight: 500; margin: 0;">Order #—</h1>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; display: block;">Amount Payable</span>
+          <strong id="paymentAmount" style="font-size: 24px; font-weight: 700; color: var(--ink);">₹0</strong>
+        </div>
+      </div>
 
-                    Credit / Debit Card
+      <!-- Payment Methods Selection -->
+      <p class="eyebrow-label" style="margin-bottom: 8px;">SELECT PAYMENT METHOD</p>
+      <h2 style="font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 20px;">Secure Transaction</h2>
 
-                </label>
-<label style="
-                        display:block;
-                        padding:15px;
-                        border:1px solid #d1d5db;
-                        border-radius:7px;
-                        margin-bottom:12px;
-                        cursor:pointer;
-                    ">
-<input name="paymentMethod" type="radio" value="COD"/>
+      <form id="paymentForm" style="display: flex; flex-direction: column; gap: 14px;">
+        <!-- UPI -->
+        <label style="
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 18px 20px;
+          border: 1px solid var(--line);
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 180ms ease;
+        " class="payment-method-label">
+          <input type="radio" name="paymentMethod" value="UPI" checked style="accent-color: var(--ink);"/>
+          <div style="flex: 1;">
+            <strong style="font-size: 14px; display: block;">Instant UPI (Google Pay, PhonePe, Paytm)</strong>
+            <span style="font-size: 12px; color: var(--muted);">Zero convenience fees · Instant verification</span>
+          </div>
+          <span style="font-size: 18px;">⚡</span>
+        </label>
 
-                    Cash on Delivery
+        <!-- Credit / Debit Card -->
+        <label style="
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 18px 20px;
+          border: 1px solid var(--line);
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 180ms ease;
+        " class="payment-method-label">
+          <input type="radio" name="paymentMethod" value="CARD" style="accent-color: var(--ink);"/>
+          <div style="flex: 1;">
+            <strong style="font-size: 14px; display: block;">Credit / Debit Card</strong>
+            <span style="font-size: 12px; color: var(--muted);">Visa, MasterCard, RuPay, American Express</span>
+          </div>
+          <span style="font-size: 18px;">💳</span>
+        </label>
 
-                </label>
-<br/>
-<button class="primary-button" id="payButton" style="width:100%;" type="submit">
-                    Pay Now
-                </button>
-</form>
-</div>
-</section>
-</main>
-<footer>
-<div class="footer-content">
-<div>
-<h3>
-                Shopora
-            </h3>
-<p>
-                Your simple and reliable
-                online shopping destination.
-            </p>
-</div>
-</div>
-<div class="footer-bottom">
-<p>
-            © 2026 Shopora. All rights reserved.
-        </p>
-</div>
-</footer>
-<script src="payment.js"></script>
-<script src="/shopy-ui.js"></script></body>
+        <!-- Cash on Delivery -->
+        <label style="
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 18px 20px;
+          border: 1px solid var(--line);
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 180ms ease;
+        " class="payment-method-label">
+          <input type="radio" name="paymentMethod" value="COD" style="accent-color: var(--ink);"/>
+          <div style="flex: 1;">
+            <strong style="font-size: 14px; display: block;">Cash on Delivery (Pay at Doorstep)</strong>
+            <span style="font-size: 12px; color: var(--muted);">Pay upon delivery of your order</span>
+          </div>
+          <span style="font-size: 18px;">💵</span>
+        </label>
+
+        <button type="submit" id="payButton" class="btn-shopy-primary" style="height: 52px; font-size: 12px; margin-top: 16px; width: 100%;">
+          AUTHORIZE & COMPLETE PAYMENT
+        </button>
+      </form>
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted);">
+        <span>🛡️ RBI Compliant Gateway</span>
+        <span>•</span>
+        <span>🔒 256-Bit Encrypted</span>
+        <span>•</span>
+        <span>✨ 100% Purchase Protection</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="/shopy-core.js"></script>
+  <script src="/payment.js"></script>
+  <script src="/shopy-ui.js"></script>
+</body>
 </html>

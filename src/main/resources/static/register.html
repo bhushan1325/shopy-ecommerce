@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SHOPY — Create Account</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,400..600&family=Playfair+Display:ital,wght@0,400..800;1,400..700&display=swap" rel="stylesheet"/>
+  
+  <link rel="stylesheet" href="/shopy-brand.css"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="stylesheet" href="/login.css"/>
+</head>
+<body style="background-color: var(--paper);">
+
+  <!-- Navbar -->
+  <header style="background: white; border-bottom: 1px solid var(--line); padding: 18px 36px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="/" class="site-logo">SHOPY<span class="dot">.</span></a>
+    <a href="/" class="link-underline">← RETURN TO STORE</a>
+  </header>
+
+  <main style="min-height: calc(100vh - 140px); display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    <div style="background: white; border: 1px solid var(--line); border-radius: 8px; width: 100%; max-width: 480px; padding: 44px; box-shadow: 0 16px 40px rgba(0,0,0,0.04);">
+      <p class="eyebrow-label" style="text-align: center; margin-bottom: 8px;">MEMBERSHIP</p>
+      <h1 style="font-family: var(--serif); font-size: 34px; font-weight: 500; text-align: center; margin: 0 0 12px; letter-spacing: -1px;">
+        Create your account.
+      </h1>
+      <p style="text-align: center; font-size: 13px; color: var(--muted); margin: 0 0 32px;">
+        Join SHOPY for faster checkout, order tracking, and private collection releases.
+      </p>
+
+      <form id="registerForm" style="display: flex; flex-direction: column; gap: 18px;">
+        <div>
+          <label for="regName" style="display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px;">Full Name</label>
+          <input type="text" id="regName" required placeholder="e.g. Eleanor Vance" style="width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 4px; padding: 0 14px; font-size: 14px; outline: none;"/>
+        </div>
+
+        <div>
+          <label for="regUsername" style="display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px;">Username</label>
+          <input type="text" id="regUsername" required placeholder="Choose a username" autocomplete="username" style="width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 4px; padding: 0 14px; font-size: 14px; outline: none;"/>
+        </div>
+
+        <div>
+          <label for="regEmail" style="display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px;">Email Address</label>
+          <input type="email" id="regEmail" required placeholder="name@example.com" autocomplete="email" style="width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 4px; padding: 0 14px; font-size: 14px; outline: none;"/>
+        </div>
+
+        <div>
+          <label for="regPassword" style="display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px;">Password</label>
+          <input type="password" id="regPassword" required placeholder="Minimum 6 characters" autocomplete="new-password" style="width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 4px; padding: 0 14px; font-size: 14px; outline: none;"/>
+        </div>
+
+        <button type="submit" id="regSubmitBtn" class="btn-shopy-primary" style="height: 50px; margin-top: 10px; font-size: 12px; width: 100%;">
+          CREATE ACCOUNT
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 28px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 20px;">
+        Already registered? <a href="/login.html" style="color: var(--ink); font-weight: 700; text-decoration: underline;">Sign in to your account</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="/shopy-core.js"></script>
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('regSubmitBtn');
+      const name = document.getElementById('regName').value.trim();
+      const username = document.getElementById('regUsername').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+
+      if (!name || !username || !email || !password) {
+        Shopy.showToast('Please fill in all registration fields.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'CREATING ACCOUNT...';
+
+      try {
+        const res = await Shopy.apiFetch('/users/register', {
+          method: 'POST',
+          body: { name, username, email, password }
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText || 'Registration failed');
+        }
+
+        Shopy.showToast('Account created successfully! Signing in...', 'success');
+
+        // Automatically log in
+        const loginRes = await Shopy.apiFetch('/users/login', {
+          method: 'POST',
+          body: { username, password }
+        });
+
+        if (loginRes.ok) {
+          const loginData = await loginRes.json();
+          Shopy.saveAuth(loginData.token, loginData.user);
+          const redirect = localStorage.getItem('redirectAfterLogin') || '/';
+          localStorage.removeItem('redirectAfterLogin');
+          setTimeout(() => { window.location.href = redirect; }, 700);
+        } else {
+          setTimeout(() => { window.location.href = '/login.html'; }, 1000);
+        }
+
+      } catch (err) {
+        console.error('Registration error:', err);
+        Shopy.showToast(err.message || 'Could not complete registration', 'error');
+        btn.disabled = false;
+        btn.textContent = 'CREATE ACCOUNT';
+      }
+    });
+  </script>
+</body>
+</html>

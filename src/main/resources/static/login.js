@@ -1,189 +1,73 @@
-document
-    .getElementById("loginForm")
-    .addEventListener(
-        "submit",
-        async function (event) {
-
-            event.preventDefault();
-
-
-            const username =
-                document
-                    .getElementById("username")
-                    .value
-                    .trim();
-
-
-            const password =
-                document
-                    .getElementById("password")
-                    .value;
-
-
-            if (!username || !password) {
-
-                alert(
-                    "Please enter username and password."
-                );
-
-                return;
-            }
-
-
-            const submitButton =
-                event.target.querySelector(
-                    'button[type="submit"]'
-                );
-
-
-            if (submitButton) {
-
-                submitButton.disabled = true;
-
-                submitButton.innerText =
-                    "Logging in...";
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/api/users/login",
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-                                username: username,
-                                password: password
-                            })
-                        }
-                    );
-
-
-                let data = {};
-
-                try {
-
-                    data =
-                        await response.json();
-
-                } catch (error) {
-
-                    console.error(
-                        "Invalid server response",
-                        error
-                    );
-                }
-
-
-                if (!response.ok) {
-
-                    alert(
-                        data.message ||
-                        "Invalid username or password."
-                    );
-
-                    return;
-                }
-
-
-                if (!data.token) {
-
-                    alert(
-                        "Login failed: server did not return a token."
-                    );
-
-                    return;
-                }
-
-
-                // ==========================
-                // SAVE JWT TOKEN
-                // ==========================
-
-                localStorage.setItem(
-                    "token",
-                    data.token
-                );
-
-
-                // ==========================
-                // SAVE USER INFORMATION
-                // ==========================
-
-                if (data.user) {
-
-                    localStorage.setItem(
-                        "user",
-                        JSON.stringify(data.user)
-                    );
-
-                }
-
-
-                // ==========================
-                // VERIFY TOKEN
-                // ==========================
-
-                const savedToken =
-                    localStorage.getItem(
-                        "token"
-                    );
-
-
-                if (!savedToken) {
-
-                    alert(
-                        "Login succeeded, but the login session could not be saved."
-                    );
-
-                    return;
-                }
-
-
-                alert(
-                    "Login successful!"
-                );
-
-
-                // ==========================
-                // RETURN TO HOME
-                // ==========================
-
-                window.location.replace("/");
-
-
-            } catch (error) {
-
-                console.error(
-                    "Login error:",
-                    error
-                );
-
-
-                alert(
-                    "Unable to connect to Shopora. Make sure the Spring Boot server is running."
-                );
-
-
-            } finally {
-
-                if (submitButton) {
-
-                    submitButton.disabled =
-                        false;
-
-                    submitButton.innerText =
-                        "Login";
-                }
-
-            }
-
+/**
+ * SHOPY — Login Controller
+ * Handles authentication via /api/users/login, JWT session persistence,
+ * and smart redirection.
+ */
+
+(function () {
+  'use strict';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('loginForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const submitBtn = document.getElementById('loginSubmitBtn');
+
+      const username = usernameInput ? usernameInput.value.trim() : '';
+      const password = passwordInput ? passwordInput.value : '';
+
+      if (!username || !password) {
+        Shopy.showToast('Please enter both username and password.', 'error');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'AUTHENTICATING...';
+      }
+
+      try {
+        const response = await Shopy.apiFetch('/users/login', {
+          method: 'POST',
+          body: { username, password }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.token) {
+          throw new Error(data.message || 'Invalid username or password.');
         }
-    );
+
+        // Save JWT & User info
+        Shopy.saveAuth(data.token, data.user);
+        Shopy.showToast(`Welcome back, ${data.user.name || data.user.username}!`, 'success');
+
+        // Check if there was an intended redirect (query param or localStorage)
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryRedirect = urlParams.get('redirect');
+        const storedRedirect = localStorage.getItem('redirectAfterLogin');
+        const redirectUrl = queryRedirect || storedRedirect || (data.user?.role === 'ADMIN' ? '/admin.html' : '/');
+        localStorage.removeItem('redirectAfterLogin');
+
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 600);
+
+      } catch (error) {
+        console.error('Login error:', error);
+        Shopy.showToast(error.message || 'Unable to sign in. Please verify credentials.', 'error');
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'SIGN IN';
+        }
+      }
+    });
+  });
+
+})();
